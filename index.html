@@ -9,88 +9,61 @@
 <meta name="apple-mobile-web-app-title" content="Katalog">
 <meta name="theme-color" content="#14171C">
 <title>Katalog otpada — indeksni brojevi</title>
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%2314171C'/%3E%3Ctext x='90' y='118' font-family='monospace' font-size='96' font-weight='700' fill='%23F5A623' text-anchor='middle'%3E%E2%97%88%3C/text%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%2314171C'/%3E%3Ctext x='90' y='124' font-family='monospace' font-size='104' font-weight='700' fill='%23F5A623' text-anchor='middle'%3E%E2%97%88%3C/text%3E%3C/svg%3E">
 <style>
   :root{
-    --bg:#14171C;
-    --surface:#1B2026;
-    --surface-2:#222a32;
-    --line:#2A323B;
-    --line-soft:#222a32;
-    --ink:#EBEEF2;
-    --ink-dim:#9AA4AF;
-    --ink-faint:#6B7681;
-    --hazard:#F5A623;
-    --hazard-bg:#3a2a0c;
-    --hazard-line:#5c4214;
-    --safe:#36D29A;
-    --safe-bg:#0e2a22;
-    --safe-line:#1c5040;
+    --bg:#14171C; --surface:#1B2026; --surface-2:#222a32;
+    --line:#2A323B; --line-soft:#222a32;
+    --ink:#EBEEF2; --ink-dim:#9AA4AF; --ink-faint:#6B7681;
+    --hazard:#F5A623; --hazard-bg:#3a2a0c; --hazard-line:#5c4214;
+    --safe:#36D29A; --safe-bg:#0e2a22; --safe-line:#1c5040;
+    --ji:#5BA8F2; --ji-bg:#10243a; --ji-line:#214a72;
     --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
     --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   html,body{margin:0;padding:0;}
-  body{
-    background:var(--bg);
-    color:var(--ink);
-    font-family:var(--sans);
-    line-height:1.45;
-    -webkit-font-smoothing:antialiased;
-    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-    min-height:100vh;
-  }
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.45;-webkit-font-smoothing:antialiased;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);min-height:100vh;}
   .wrap{max-width:560px;margin:0 auto;padding:18px 16px 40px;}
 
-  /* Header */
   header{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:16px;}
   .brand{font-weight:700;font-size:15px;letter-spacing:.02em;}
   .brand .mark{color:var(--hazard);}
   .sub{font-size:12px;color:var(--ink-faint);letter-spacing:.04em;text-transform:uppercase;}
 
-  /* Mode toggle */
   .modes{display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:4px;margin-bottom:10px;}
-  .modes button{
-    flex:1;border:0;background:transparent;color:var(--ink-dim);
-    font-family:var(--sans);font-size:14px;font-weight:600;padding:9px 8px;border-radius:9px;cursor:pointer;
-  }
+  .modes button{flex:1;border:0;background:transparent;color:var(--ink-dim);font-family:var(--sans);font-size:13.5px;font-weight:600;padding:9px 6px;border-radius:9px;cursor:pointer;white-space:nowrap;}
   .modes button[aria-selected="true"]{background:var(--surface-2);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line);}
+  .modes button#m-our[aria-selected="true"]{color:var(--ji);box-shadow:inset 0 0 0 1px var(--ji-line);}
 
-  /* Search field */
   .field{position:relative;margin-bottom:10px;}
-  #q{
-    width:100%;background:var(--surface);border:1px solid var(--line);
-    border-radius:14px;color:var(--ink);
-    font-family:var(--mono);font-size:30px;font-weight:600;letter-spacing:.06em;
-    padding:18px 52px 18px 18px;outline:none;
-  }
+  #q{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:14px;color:var(--ink);
+    font-family:var(--mono);font-size:30px;font-weight:600;letter-spacing:.06em;padding:18px 52px 18px 18px;outline:none;}
   #q::placeholder{color:var(--ink-faint);font-weight:500;letter-spacing:.02em;}
   #q:focus{border-color:var(--hazard);}
-  body.name-mode #q{font-family:var(--sans);font-size:19px;font-weight:500;letter-spacing:0;padding-right:52px;}
-  .clear{
-    position:absolute;right:10px;top:50%;transform:translateY(-50%);
-    width:34px;height:34px;border:0;border-radius:50%;background:var(--surface-2);
-    color:var(--ink-dim);font-size:18px;line-height:1;cursor:pointer;display:none;
-  }
+  body.name-mode #q,body.our-mode #q{font-family:var(--sans);font-size:19px;font-weight:500;letter-spacing:0;}
+  .clear{position:absolute;right:10px;top:50%;transform:translateY(-50%);width:34px;height:34px;border:0;border-radius:50%;
+    background:var(--surface-2);color:var(--ink-dim);font-size:18px;line-height:1;cursor:pointer;display:none;}
   .clear.show{display:flex;align-items:center;justify-content:center;}
 
-  /* Results */
   .meta{font-size:12px;color:var(--ink-faint);margin:2px 2px 12px;min-height:16px;}
   ul.list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;}
-  .row{
-    background:var(--surface);border:1px solid var(--line-soft);border-radius:12px;
-    padding:13px 14px;cursor:pointer;display:flex;align-items:center;gap:12px;
-    transition:border-color .12s ease;
-  }
+  .row{background:var(--surface);border:1px solid var(--line-soft);border-radius:12px;padding:13px 14px;cursor:pointer;
+    display:flex;align-items:center;gap:11px;transition:border-color .12s ease;}
   .row:active{border-color:var(--hazard);}
   .dot{width:9px;height:9px;border-radius:50%;flex:none;}
   .dot.h{background:var(--hazard);box-shadow:0 0 0 3px var(--hazard-bg);}
   .dot.s{background:var(--safe);box-shadow:0 0 0 3px var(--safe-bg);}
-  .row .code{font-family:var(--mono);font-size:15px;font-weight:600;letter-spacing:.05em;flex:none;width:84px;}
-  .row .nm{font-size:13.5px;color:var(--ink-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .row .chev{margin-left:auto;color:var(--ink-faint);flex:none;}
+  .row .code{font-family:var(--mono);font-size:15px;font-weight:600;letter-spacing:.05em;flex:none;width:82px;}
+  .row .nm{font-size:13.5px;color:var(--ink-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0;}
+  .row .chev{color:var(--ink-faint);flex:none;}
+  .pb-wrap{flex:none;}
+  .pb{font-size:10px;font-weight:700;letter-spacing:.03em;padding:3px 6px;border-radius:6px;white-space:nowrap;}
+  .pb-all{background:var(--ji-bg);color:var(--ji);border:1px solid var(--ji-line);}
+  .pb-st{background:var(--safe-bg);color:var(--safe);border:1px solid var(--safe-line);}
+  .pb-sk{background:var(--hazard-bg);color:var(--hazard);border:1px solid var(--hazard-line);}
 
-  /* Detail card */
   .card{border-radius:16px;border:1px solid var(--line);overflow:hidden;}
   .card.hazard{border-color:var(--hazard-line);}
   .card.safe{border-color:var(--safe-line);}
@@ -103,35 +76,34 @@
   .bigcode{font-family:var(--mono);font-size:38px;font-weight:700;letter-spacing:.08em;margin:12px 0 2px;}
   .bigcode .star{color:var(--hazard);}
   .naziv{font-size:18px;line-height:1.4;color:var(--ink);margin-top:8px;}
-  .ctx{border-top:1px solid var(--line);padding:14px 18px;display:flex;flex-direction:column;gap:11px;}
-  .ctx .k{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:2px;}
+  .ctx{border-top:1px solid var(--line);padding:14px 18px;display:flex;flex-direction:column;gap:13px;}
+  .ctx .k{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:3px;}
   .ctx .v{font-size:14px;color:var(--ink-dim);}
   .ctx .v b{color:var(--ink);font-weight:600;}
+  .permit-block{display:flex;flex-direction:column;gap:9px;}
+  .prow{display:flex;align-items:flex-start;gap:10px;}
+  .pico{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex:none;}
+  .pico.st{background:var(--safe-bg);color:var(--safe);}
+  .pico.sk{background:var(--hazard-bg);color:var(--hazard);}
+  .pk{font-size:13.5px;font-weight:600;color:var(--ink);}
+  .pv{font-size:12px;color:var(--ink-faint);margin-top:1px;}
+  .permit-none{font-size:14px;color:var(--ink-faint);font-style:italic;}
   .actions{display:flex;gap:8px;padding:0 18px 18px;}
-  .actions button{
-    flex:1;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);
-    font-family:var(--sans);font-size:14px;font-weight:600;padding:11px;border-radius:11px;cursor:pointer;
-  }
+  .actions button{flex:1;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font-family:var(--sans);
+    font-size:14px;font-weight:600;padding:11px;border-radius:11px;cursor:pointer;}
   .actions button:active{border-color:var(--hazard);}
 
-  /* Group chips (empty state) */
-  .empty{margin-top:6px;}
   .empty h2{font-size:13px;font-weight:600;color:var(--ink-faint);letter-spacing:.04em;text-transform:uppercase;margin:0 2px 10px;}
   .chips{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
-  .chip{
-    background:var(--surface);border:1px solid var(--line-soft);border-radius:12px;
-    padding:12px 13px;cursor:pointer;text-align:left;display:flex;gap:11px;align-items:flex-start;
-  }
+  .chip{background:var(--surface);border:1px solid var(--line-soft);border-radius:12px;padding:12px 13px;cursor:pointer;
+    text-align:left;display:flex;gap:11px;align-items:flex-start;}
   .chip:active{border-color:var(--hazard);}
   .chip .gn{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--hazard);flex:none;}
   .chip .gt{font-size:12px;color:var(--ink-dim);line-height:1.35;}
   .none{color:var(--ink-faint);font-size:14px;padding:18px 2px;}
   footer{margin-top:26px;text-align:center;font-size:11px;color:var(--ink-faint);line-height:1.6;}
-  .toast{
-    position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);
-    background:var(--ink);color:var(--bg);font-size:13px;font-weight:600;padding:10px 16px;border-radius:10px;
-    opacity:0;pointer-events:none;transition:.2s;z-index:10;
-  }
+  .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);
+    font-size:13px;font-weight:600;padding:10px 16px;border-radius:10px;opacity:0;pointer-events:none;transition:.2s;z-index:10;}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
   .back{display:none;background:transparent;border:0;color:var(--hazard);font-family:var(--sans);font-size:14px;font-weight:600;padding:6px 0;margin-bottom:10px;cursor:pointer;}
   .back.show{display:inline-flex;align-items:center;gap:6px;}
@@ -145,13 +117,13 @@
   </header>
 
   <div class="modes" role="tablist">
-    <button id="m-num" role="tab" aria-selected="true">Indeksni broj</button>
-    <button id="m-name" role="tab" aria-selected="false">Naziv otpada</button>
+    <button id="m-num" role="tab" aria-selected="true">Broj</button>
+    <button id="m-name" role="tab" aria-selected="false">Naziv</button>
+    <button id="m-our" role="tab" aria-selected="false">Naši ◈</button>
   </div>
 
   <div class="field">
-    <input id="q" inputmode="numeric" autocomplete="off" autocorrect="off" spellcheck="false"
-           placeholder="npr. 16 01 03" aria-label="Pretraga">
+    <input id="q" inputmode="numeric" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="npr. 16 01 03" aria-label="Pretraga">
     <button class="clear" id="clear" aria-label="Obriši">✕</button>
   </div>
 
@@ -1153,234 +1125,205 @@
 200399 komunalni otpadi koji nisu drugačije specificirani
 </script>
 <script>
+
 (function(){
   "use strict";
-  // ---- Parse embedded catalogue ----
-  var raw = document.getElementById('data').textContent;
-  var groups = {};      // "01" -> name
-  var subgroups = {};   // "0101" -> name
-  var entries = [];     // {code, fmt, name, haz, g, s}
-  var byCode = {};      // "160103" -> entry
+  var PERMIT={"170101":3,"200138":3,"110111":3,"080201":3,"170401":3,"130112":3,"130301":3,"191201":3,"080501":3,"080113":3,"160117":3,"200129":3,"150107":3,"191202":3,"120302":3,"101003":3,"150109":3,"150110":3,"130110":3,"200101":3,"080111":3,"130309":3,"170405":3,"080399":3,"200307":3,"160801":3,"150106":3,"170407":3,"080118":3,"170403":3,"170411":3,"130206":3,"130401":3,"130802":3,"170504":3,"150104":3,"140603":3,"191204":3,"200133":3,"160604":3,"160106":3,"160199":3,"130208":3,"080116":3,"170904":3,"130306":3,"130402":3,"100601":3,"160605":3,"080318":3,"191212":3,"130703":3,"160304":3,"191203":3,"191006":3,"120102":3,"160216":3,"170404":3,"130307":3,"120119":3,"150203":3,"130109":3,"160116":3,"130403":3,"110113":3,"200102":3,"110112":3,"110110":3,"200140":3,"080117":3,"130205":3,"130105":3,"160804":3,"170202":3,"170201":3,"130310":3,"160118":3,"191001":3,"150102":3,"150105":3,"080409":3,"170402":3,"110206":3,"100699":3,"160214":3,"160115":3,"120101":3,"160119":3,"170802":3,"120110":3,"170604":3,"150101":3,"130111":3,"130207":3,"160120":3,"130899":3,"130801":3,"170102":3,"120109":3,"080112":3,"070101":3,"200134":3,"120199":3,"130204":3,"020109":3,"100602":3,"120104":3,"191002":3,"030105":1,"150103":3,"101105":3,"170103":3,"191004":3,"160103":3,"160122":3,"130308":3,"160803":3,"170203":3,"080114":3,"120301":3,"191210":3,"200137":3,"200139":3,"170406":3,"191207":3,"160112":3,"200136":3,"070213":1,"020101":3,"200135":3,"120107":3,"200199":3,"120105":3,"160306":3,"130506":3,"130507":3,"130508":3,"130113":3,"120103":3,"170107":3,"170302":3,"170508":3,"170506":3,"070408":2,"110205":2,"190702":2,"100503":2,"160802":2,"160402":2,"080314":2,"190901":2,"190115":2,"040105":2,"191208":2,"040106":2,"100317":2,"190810":2,"070212":2,"030199":2,"110106":2,"060404":2,"100606":2,"170503":2,"180110":2,"160303":2,"100812":2,"191206":2,"160505":2,"150202":2,"070204":2,"110105":2,"100207":2,"030205":2,"100407":2,"200141":2,"100114":2,"100603":2,"190904":2,"060999":2,"061304":2,"110115":2,"080410":2,"101110":2,"080299":2,"190306":2,"161004":2,"120108":2,"170605":2,"070701":2,"120116":2,"190117":2,"110599":2,"100911":2,"070312":2,"160507":2,"080319":2,"100109":2,"120114":2,"161106":2,"160709":2,"070709":2,"190401":2,"100402":2,"070707":2,"160601":2,"040217":2,"100508":2,"190605":2,"160805":2,"060204":2,"200110":2,"190806":2,"120112":2,"080413":2,"080312":2,"160903":2,"070304":2,"070404":2,"101118":2,"190307":2,"060203":2,"060205":2,"200132":2,"060101":2,"170902":2,"070413":2,"190606":2,"170903":2,"040215":2,"101211":2,"080415":2,"191005":2,"080416":2,"191103":2,"100510":2,"120120":2,"190811":2,"070708":2,"190305":2,"160506":2,"070511":2,"120106":2,"191101":2,"160211":2,"060315":2,"110107":2,"190902":2,"060603":2,"200301":2,"170601":2,"170507":2,"190802":2,"101115":2,"190403":2,"100905":2,"100327":2,"161001":2,"191205":2,"120113":2,"070214":2,"060405":2,"070301":2,"090101":2,"100104":2,"100323":2,"180205":2,"100116":2,"191107":2,"040219":2,"061302":2,"070111":2,"100815":2,"160902":2,"140602":2,"101009":2,"101111":2,"130502":2,"190809":2,"160104":2,"101013":2,"070310":2,"170410":2,"101309":2,"070610":2,"080411":2,"110114":2,"080308":2,"100913":2,"061301":2,"070603":2,"070703":2,"110301":2,"100325":2,"070209":2,"060802":2,"160904":2,"190807":2,"070103":2,"190203":2,"190501":2,"160305":2,"160806":2,"101014":2,"120121":2,"101112":2,"190805":2,"200201":2,"101015":2,"070711":2,"060699":2,"190304":2,"110501":2,"190105":2,"070308":2,"060704":2,"070609":2,"100319":2,"100819":2,"100403":2,"060602":2,"190903":2,"070309":2,"070403":2,"190813":2,"070208":2,"180103":2,"190110":2,"200303":2,"030204":2,"050108":2,"101008":2,"101209":2,"060313":2,"160606":2,"100406":2,"070607":2,"090106":2,"130702":2,"170409":2,"030202":2,"190208":2,"080316":2,"100405":2,"100315":2,"070604":2,"100122":2,"160110":2,"170106":2,"050112":2,"140601":2,"190204":2,"170901":2,"090105":2,"020108":2,"050103":2,"070210":2,"191105":2,"190502":2,"200117":2,"100909":2,"100213":2,"170204":2,"080313":2,"160212":2,"120115":2,"100506":2,"070109":2,"080315":2,"200203":2,"080317":2,"040104":2,"100907":2,"080115":2,"040221":2,"070107":2,"070512":2,"200399":2,"120117":2,"060201":2,"160708":2,"191104":2,"110504":2,"190906":2,"161101":2,"190205":2,"180108":2,"120118":2,"190207":2,"060903":2,"160401":2,"110302":2,"101012":2,"070303":2,"100505":2,"110198":2,"060106":2,"160403":2,"070203":2,"161102":2,"200121":2,"060102":2,"061305":2,"200125":2,"170801":2,"110503":2,"161105":2,"160107":2,"190604":2,"130503":2,"100321":2,"101401":2,"060902":2,"100707":2,"100113":2,"040214":2,"060701":2,"200126":2,"060311":2,"040222":2,"060904":2,"070508":2,"060503":2,"070507":2,"100817":2,"060502":2,"050106":2,"110502":2,"061002":2,"050115":2,"100309":2,"200114":2,"030104":2,"190402":2,"060703":2,"100211":2,"101005":2,"070311":2,"050104":2,"090113":2,"101312":2,"200123":2,"160215":2,"130104":2,"130501":2,"100118":2,"101116":2,"090102":2,"190209":2,"170505":2,"161103":2,"070509":2,"160114":2,"070712":2,"101113":2,"200302":2,"070409":2,"160113":2,"100808":2,"200113":2,"191209":2,"070104":2,"070501":2,"070201":2,"070410":2,"030201":2,"050107":2,"190599":2,"190999":2,"191003":2,"160504":2,"080417":2,"030299":2,"061303":2,"070704":2,"070612":2,"190703":2,"090103":2,"070503":2,"101007":2,"200111":2,"170301":2,"070307":2,"090104":2,"190107":2,"200304":2,"101109":2,"200306":2,"070110":2,"100329":2,"050110":2,"140604":2,"160901":2,"070401":2,"160109":2,"191102":2,"101199":2,"070611":2,"160121":2,"101120":2,"080307":2,"080414":2,"040210":2,"100810":2,"130101":2,"190603":2,"070513":2,"160807":2,"070412":2,"191211":2,"130701":2,"030203":2,"160213":2,"070601":2,"160108":2,"080121":2,"070216":2,"080120":2,"200202":2,"180207":2,"080412":2,"101006":2,"190211":2,"080119":2,"190699":2,"161104":2,"190111":2,"160209":2,"110202":2,"200130":2,"100409":2,"100401":2,"200128":2,"100308":2,"060103":2,"161003":2,"190106":2,"100304":2,"070211":2,"200127":2,"060105":2,"160111":2,"160210":2,"070510":2,"190808":2,"190404":2,"100607":2,"170303":2,"070112":2,"040103":2,"100609":2,"070108":2,"190503":2,"070407":2,"180202":2,"110116":2,"090111":2,"100120":2,"180106":2,"040216":2,"110203":2,"160508":2,"101099":2,"040199":2,"070710":2,"060403":2,"060702":2,"140605":2,"190905":2,"200131":2,"161002":2,"080203":2,"101011":2,"050102":2,"110109":2,"200108":2,"160509":2,"101010":2,"100915":2,"080202":2,"160602":2,"050109":2,"101114":2,"190801":2,"070207":2,"110207":2,"100404":2,"190113":2,"160603":2,"170603":2,"070411":2,"200115":2,"050111":2,"101016":2,"070608":2,"101119":2,"110108":2,"060104":2,"040209":2,"150111":2,"200119":2,"101117":2,"040220":2,"050105":2,"070504":2};
 
-  function fmt(c){ return c.slice(0,2)+' '+c.slice(2,4)+' '+c.slice(4,6); }
-
+  var raw=document.getElementById('data').textContent;
+  var groups={},subgroups={},entries=[],byCode={};
+  function fmt(c){return c.slice(0,2)+' '+c.slice(2,4)+' '+c.slice(4,6);}
   raw.split('\n').forEach(function(line){
-    line = line.trim();
-    if(!line) return;
-    if(line[0]==='@'){
-      var g = line.slice(1,3);
-      groups[g] = line.slice(4).trim();
-    } else if(line[0]==='>'){
-      var s = line.slice(1,5);
-      subgroups[s] = line.slice(6).trim();
-    } else {
-      var sp = line.indexOf(' ');
-      var code = line.slice(0,sp);
-      var name = line.slice(sp+1).trim();
-      var haz = code.indexOf('*')>-1;
-      code = code.replace('*','');
-      var e = {code:code, fmt:fmt(code), name:name, haz:haz, g:code.slice(0,2), s:code.slice(0,4)};
-      entries.push(e);
-      byCode[code] = e;
+    line=line.trim();if(!line)return;
+    if(line[0]==='@'){groups[line.slice(1,3)]=line.slice(4).trim();}
+    else if(line[0]==='>'){subgroups[line.slice(1,5)]=line.slice(6).trim();}
+    else{
+      var sp=line.indexOf(' ');var code=line.slice(0,sp);var name=line.slice(sp+1).trim();
+      var haz=code.indexOf('*')>-1;code=code.replace('*','');
+      var pf=PERMIT[code]||0;
+      var e={code:code,fmt:fmt(code),name:name,haz:haz,g:code.slice(0,2),s:code.slice(0,4),pf:pf};
+      entries.push(e);byCode[code]=e;
     }
   });
+  function norm(s){return s.toLowerCase().replace(/[čć]/g,'c').replace(/š/g,'s').replace(/ž/g,'z').replace(/đ/g,'d');}
+  entries.forEach(function(e){e.q=norm(e.name);});
 
-  // normalize for search (strip diacritics)
-  function norm(s){
-    return s.toLowerCase()
-      .replace(/č|ć/g,'c').replace(/š/g,'s').replace(/ž/g,'z').replace(/đ/g,'d');
-  }
-  entries.forEach(function(e){ e.q = norm(e.name); });
-
-  // ---- DOM ----
-  var qEl = document.getElementById('q');
-  var clearEl = document.getElementById('clear');
-  var metaEl = document.getElementById('meta');
-  var outEl = document.getElementById('out');
-  var backEl = document.getElementById('back');
-  var toastEl = document.getElementById('toast');
-  var mNum = document.getElementById('m-num');
-  var mName = document.getElementById('m-name');
-  var mode = 'num';
-  var lastResults = null; // remember list to return to via "Nazad"
+  var qEl=document.getElementById('q');
+  var clearEl=document.getElementById('clear');
+  var metaEl=document.getElementById('meta');
+  var outEl=document.getElementById('out');
+  var backEl=document.getElementById('back');
+  var toastEl=document.getElementById('toast');
+  var mNum=document.getElementById('m-num');
+  var mName=document.getElementById('m-name');
+  var mOur=document.getElementById('m-our');
+  var mode='num';var filterOur=false;var lastResults=null;
 
   function setMode(m){
-    mode = m;
-    document.body.classList.toggle('name-mode', m==='name');
-    document.body.classList.toggle('num-mode', m==='num');
-    mNum.setAttribute('aria-selected', m==='num');
-    mName.setAttribute('aria-selected', m==='name');
-    qEl.value='';
-    qEl.setAttribute('inputmode', m==='num'?'numeric':'text');
-    qEl.placeholder = m==='num' ? 'npr. 16 01 03' : 'npr. ambalaža, ulje, baterije';
-    clearEl.classList.remove('show');
-    qEl.focus();
-    render();
-  }
-  mNum.addEventListener('click', function(){ setMode('num'); });
-  mName.addEventListener('click', function(){ setMode('name'); });
-
-  // digits -> "GG SS PP" live formatting in num mode
-  function formatLive(v){
-    var d = v.replace(/\D/g,'').slice(0,6);
-    var out='';
-    for(var i=0;i<d.length;i++){ if(i===2||i===4) out+=' '; out+=d[i]; }
-    return {disp:out, digits:d};
-  }
-
-  qEl.addEventListener('input', function(){
-    if(mode==='num'){
-      var f = formatLive(qEl.value);
-      qEl.value = f.disp;
+    if(m==='our'){
+      filterOur=true;
+      mOur.setAttribute('aria-selected','true');
+      mNum.setAttribute('aria-selected','false');
+      mName.setAttribute('aria-selected','false');
+    } else {
+      filterOur=false;mode=m;
+      mOur.setAttribute('aria-selected','false');
+      document.body.classList.toggle('name-mode',m==='name');
+      document.body.classList.toggle('num-mode',m==='num');
+      mNum.setAttribute('aria-selected',m==='num');
+      mName.setAttribute('aria-selected',m==='name');
+      qEl.setAttribute('inputmode',m==='num'?'numeric':'text');
+      qEl.placeholder=m==='num'?'npr. 16 01 03':'npr. ambalaža, ulje, baterije';
     }
-    clearEl.classList.toggle('show', qEl.value.length>0);
+    qEl.value='';clearEl.classList.remove('show');qEl.focus();render();
+  }
+  mNum.addEventListener('click',function(){setMode('num');});
+  mName.addEventListener('click',function(){setMode('name');});
+  mOur.addEventListener('click',function(){setMode('our');});
+
+  function formatLive(v){
+    var d=v.replace(/[^0-9]/g,'').slice(0,6);
+    var out='';for(var i=0;i<d.length;i++){if(i===2||i===4)out+=' ';out+=d[i];}
+    return{disp:out,digits:d};
+  }
+  qEl.addEventListener('input',function(){
+    if(mode==='num'&&!filterOur){var f=formatLive(qEl.value);qEl.value=f.disp;}
+    clearEl.classList.toggle('show',qEl.value.length>0);
     render();
   });
-  clearEl.addEventListener('click', function(){ qEl.value=''; clearEl.classList.remove('show'); qEl.focus(); render(); });
-  backEl.addEventListener('click', function(){ if(lastResults){ renderList(lastResults.items, lastResults.label); } });
+  clearEl.addEventListener('click',function(){qEl.value='';clearEl.classList.remove('show');qEl.focus();render();});
+  backEl.addEventListener('click',function(){if(lastResults){renderList(lastResults.items,lastResults.label);}});
 
-  function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+  function permitBadgeSmall(pf){
+    if(!pf)return '';
+    var st=pf&1,sk=pf&2;
+    if(st&&sk)return '<span class="pb pb-all">◈ JI</span>';
+    if(st)return '<span class="pb pb-st">⟳ S+T</span>';
+    return '<span class="pb pb-sk">▣ Sk</span>';
+  }
+  function permitBadgeFull(pf){
+    if(!pf)return '<div class="permit-none">Nije u dozvolama Jugo-Impex</div>';
+    var st=pf&1,sk=pf&2,rows='';
+    if(st)rows+='<div class="prow"><span class="pico st">⟳</span><div><div class="pk">Sakupljanje i transport</div><div class="pv">Dozvola 007/3 &middot; važi do 03.05.2030.</div></div></div>';
+    if(sk)rows+='<div class="prow"><span class="pico sk">▣</span><div><div class="pk">Skladištenje</div><div class="pv">Integralna dozvola &middot; Radni plan 2025</div></div></div>';
+    return '<div class="permit-block">'+rows+'</div>';
+  }
 
   function render(){
     backEl.classList.remove('show');
-    var v = qEl.value.trim();
-    if(!v){ renderEmpty(); return; }
-
+    var v=qEl.value.trim();
+    if(filterOur){
+      var pool=entries.filter(function(e){return e.pf>0;});
+      var matched=pool;
+      if(v.length>=2){
+        var sq=norm(v);
+        var dq=v.replace(/[^0-9]/g,'');
+        matched=pool.filter(function(e){return e.q.indexOf(sq)>-1||(dq.length>=2&&e.code.indexOf(dq)===0);});
+      }
+      renderList(matched,'Jugo-Impex dozvole &middot; '+pool.length+' kodova');
+      return;
+    }
+    if(!v){renderEmpty();return;}
     if(mode==='num'){
-      var d = v.replace(/\D/g,'');
-      if(d.length===0){ renderEmpty(); return; }
-      var matches = entries.filter(function(e){ return e.code.indexOf(d)===0; });
-      if(d.length===6 && byCode[d]){ renderDetail(byCode[d], null); return; }
-      renderList(matches, d.length===6 ? null : prefixLabel(d));
+      var d=v.replace(/[^0-9]/g,'');
+      if(!d){renderEmpty();return;}
+      var matches=entries.filter(function(e){return e.code.indexOf(d)===0;});
+      if(d.length===6&&byCode[d]){renderDetail(byCode[d],null);return;}
+      renderList(matches,prefixLabel(d));
     } else {
-      var nq = norm(v);
-      if(nq.length<2){ metaEl.textContent='Ukucaj bar 2 slova…'; outEl.innerHTML=''; return; }
-      var matches2 = entries.filter(function(e){ return e.q.indexOf(nq)>-1; });
-      renderList(matches2, null);
+      var nq=norm(v);
+      if(nq.length<2){metaEl.textContent='Ukucaj bar 2 slova...';outEl.innerHTML='';return;}
+      var matches2=entries.filter(function(e){return e.q.indexOf(nq)>-1;});
+      renderList(matches2,null);
     }
   }
 
   function prefixLabel(d){
-    if(d.length>=4 && subgroups[d.slice(0,4)]) return 'Podgrupa '+d.slice(0,2)+' '+d.slice(2,4)+' · '+subgroups[d.slice(0,4)];
-    if(d.length>=2 && groups[d.slice(0,2)]) return 'Grupa '+d.slice(0,2)+' · '+groups[d.slice(0,2)];
+    if(d.length>=4&&subgroups[d.slice(0,4)])return 'Podgrupa '+d.slice(0,2)+' '+d.slice(2,4)+' · '+subgroups[d.slice(0,4)];
+    if(d.length>=2&&groups[d.slice(0,2)])return 'Grupa '+d.slice(0,2)+' · '+groups[d.slice(0,2)];
     return null;
   }
 
-  function renderList(items, label){
-    lastResults = {items:items, label:label};
+  function renderList(items,label){
+    lastResults={items:items,label:label};
     backEl.classList.remove('show');
-    if(items.length===0){
+    if(!items.length){
       metaEl.textContent='';
-      outEl.innerHTML = '<div class="none">Nema rezultata. Proveri broj ili pretraži po nazivu.</div>';
+      outEl.innerHTML='<div class="none">Nema rezultata. Proveri broj ili pretraži po nazivu.</div>';
       return;
     }
-    if(items.length===1){ renderDetail(items[0], {items:items, label:label}); return; }
-    metaEl.textContent = (label?label+'  ·  ':'') + items.length + ' rezultata';
-    var html = '<ul class="list">';
+    if(items.length===1){renderDetail(items[0],{items:items,label:label});return;}
+    metaEl.innerHTML=(label?label+'  &middot;  ':'')+items.length+' rezultata';
+    var html='<ul class="list">';
     items.slice(0,400).forEach(function(e){
-      html += '<li class="row" data-code="'+e.code+'">'
-        + '<span class="dot '+(e.haz?'h':'s')+'"></span>'
-        + '<span class="code">'+e.fmt+(e.haz?'<span class="star" style="color:var(--hazard)">*</span>':'')+'</span>'
-        + '<span class="nm">'+esc(e.name)+'</span>'
-        + '<span class="chev">›</span>'
-        + '</li>';
+      html+='<li class="row" data-code="'+e.code+'">'
+        +'<span class="dot '+(e.haz?'h':'s')+'"></span>'
+        +'<span class="code">'+e.fmt+(e.haz?'<span style="color:var(--hazard)">*</span>':'')+'</span>'
+        +'<span class="nm">'+esc(e.name)+'</span>'
+        +(e.pf?'<span class="pb-wrap">'+permitBadgeSmall(e.pf)+'</span>':'')
+        +'<span class="chev">›</span>'
+        +'</li>';
     });
-    html += '</ul>';
-    outEl.innerHTML = html;
-    Array.prototype.forEach.call(outEl.querySelectorAll('.row'), function(row){
-      row.addEventListener('click', function(){
-        renderDetail(byCode[row.getAttribute('data-code')], lastResults);
-      });
+    html+='</ul>';
+    outEl.innerHTML=html;
+    Array.prototype.forEach.call(outEl.querySelectorAll('.row'),function(row){
+      row.addEventListener('click',function(){renderDetail(byCode[row.getAttribute('data-code')],lastResults);});
     });
   }
 
-  function renderDetail(e, returnTo){
+  function renderDetail(e,returnTo){
     metaEl.textContent='';
-    if(returnTo && returnTo.items && returnTo.items.length>1){
-      backEl.classList.add('show');
-      lastResults = returnTo;
-    } else {
-      backEl.classList.remove('show');
-    }
-    var cls = e.haz?'hazard':'safe';
-    var badge = e.haz
-      ? '<span class="badge h">⚠ Opasan otpad</span>'
-      : '<span class="badge s">● Neopasan otpad</span>';
-    var html = '<div class="card '+cls+'">'
-      + '<div class="top">'
-      +   badge
-      +   '<div class="bigcode">'+e.fmt+(e.haz?'<span class="star">*</span>':'')+'</div>'
-      +   '<div class="naziv">'+esc(e.name)+'</div>'
-      + '</div>'
-      + '<div class="ctx">'
-      +   '<div><div class="k">Grupa</div><div class="v"><b>'+e.g+'</b> · '+esc(groups[e.g]||'')+'</div></div>'
-      +   '<div><div class="k">Podgrupa</div><div class="v"><b>'+e.s.slice(0,2)+' '+e.s.slice(2,4)+'</b> · '+esc(subgroups[e.s]||'')+'</div></div>'
-      +   '<div><div class="k">Status</div><div class="v">'+(e.haz
-            ? 'Opasan otpad — označen zvezdicom (*) u Katalogu otpada.'
-            : 'Neopasan otpad.')+'</div></div>'
-      + '</div>'
-      + '<div class="actions">'
-      +   '<button id="copyCode">Kopiraj broj</button>'
-      +   '<button id="copyFull">Kopiraj broj + naziv</button>'
-      + '</div>'
-      + '</div>';
-    outEl.innerHTML = html;
-    document.getElementById('copyCode').addEventListener('click', function(){
-      copy(e.fmt+(e.haz?'*':''));
-    });
-    document.getElementById('copyFull').addEventListener('click', function(){
-      copy(e.fmt+(e.haz?'*':'')+' — '+e.name);
-    });
+    if(returnTo&&returnTo.items&&returnTo.items.length>1){backEl.classList.add('show');lastResults=returnTo;}
+    else{backEl.classList.remove('show');}
+    var cls=e.haz?'hazard':'safe';
+    var badge=e.haz?'<span class="badge h">&#9888; Opasan otpad</span>':'<span class="badge s">&#9679; Neopasan otpad</span>';
+    var html='<div class="card '+cls+'">'
+      +'<div class="top">'+badge
+      +'<div class="bigcode">'+e.fmt+(e.haz?'<span class="star">*</span>':'')+'</div>'
+      +'<div class="naziv">'+esc(e.name)+'</div>'
+      +'</div>'
+      +'<div class="ctx">'
+      +'<div><div class="k">Grupa</div><div class="v"><b>'+e.g+'</b> &middot; '+esc(groups[e.g]||'')+'</div></div>'
+      +'<div><div class="k">Podgrupa</div><div class="v"><b>'+e.s.slice(0,2)+' '+e.s.slice(2,4)+'</b> &middot; '+esc(subgroups[e.s]||'')+'</div></div>'
+      +'<div><div class="k">Status</div><div class="v">'+(e.haz?'Opasan otpad — označen zvezdicom (*) u Katalogu.':'Neopasan otpad.')+'</div></div>'
+      +'<div><div class="k">Jugo-Impex dozvole</div>'+permitBadgeFull(e.pf)+'</div>'
+      +'</div>'
+      +'<div class="actions"><button id="copyCode">Kopiraj broj</button><button id="copyFull">Kopiraj broj + naziv</button></div>'
+      +'</div>';
+    outEl.innerHTML=html;
+    document.getElementById('copyCode').addEventListener('click',function(){copy(e.fmt+(e.haz?'*':''));});
+    document.getElementById('copyFull').addEventListener('click',function(){copy(e.fmt+(e.haz?'*':'')+' — '+e.name);});
   }
 
   function renderEmpty(){
-    lastResults=null;
-    backEl.classList.remove('show');
-    var haz = entries.filter(function(e){return e.haz;}).length;
-    metaEl.textContent = entries.length + ' indeksnih brojeva · ' + haz + ' opasnih';
-    var html = '<div class="empty"><h2>Grupe otpada</h2><div class="chips">';
+    lastResults=null;backEl.classList.remove('show');
+    var inP=entries.filter(function(e){return e.pf>0;}).length;
+    metaEl.textContent=entries.length+' indeksnih brojeva · '+inP+' u dozvolama JI';
+    var html='<div class="empty"><h2>Grupe otpada</h2><div class="chips">';
     Object.keys(groups).sort().forEach(function(g){
-      html += '<button class="chip" data-g="'+g+'">'
-        + '<span class="gn">'+g+'</span>'
-        + '<span class="gt">'+esc(groups[g])+'</span>'
-        + '</button>';
+      html+='<button class="chip" data-g="'+g+'"><span class="gn">'+g+'</span><span class="gt">'+esc(groups[g])+'</span></button>';
     });
-    html += '</div></div>';
-    outEl.innerHTML = html;
-    Array.prototype.forEach.call(outEl.querySelectorAll('.chip'), function(chip){
-      chip.addEventListener('click', function(){
-        var g = chip.getAttribute('data-g');
-        setMode('num');
-        qEl.value = g;
-        clearEl.classList.add('show');
-        render();
-        window.scrollTo({top:0,behavior:'smooth'});
+    html+='</div></div>';
+    outEl.innerHTML=html;
+    Array.prototype.forEach.call(outEl.querySelectorAll('.chip'),function(chip){
+      chip.addEventListener('click',function(){
+        setMode('num');qEl.value=chip.getAttribute('data-g');
+        clearEl.classList.add('show');render();window.scrollTo({top:0,behavior:'smooth'});
       });
     });
   }
 
   function copy(text){
-    var done = function(){ toast(); };
-    if(navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(text).then(done, fallback);
-    } else { fallback(); }
-    function fallback(){
-      var ta=document.createElement('textarea'); ta.value=text; ta.style.position='fixed'; ta.style.opacity='0';
-      document.body.appendChild(ta); ta.select();
-      try{ document.execCommand('copy'); }catch(e){}
-      document.body.removeChild(ta); toast();
-    }
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(doToast,fb);}
+    else fb();
+    function fb(){var ta=document.createElement('textarea');ta.value=text;ta.style.cssText='position:fixed;opacity:0';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');}catch(x){}document.body.removeChild(ta);doToast();}
   }
-  var toastTimer;
-  function toast(){
-    toastEl.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer=setTimeout(function(){ toastEl.classList.remove('show'); }, 1400);
-  }
+  var tt;
+  function doToast(){toastEl.classList.add('show');clearTimeout(tt);tt=setTimeout(function(){toastEl.classList.remove('show');},1400);}
 
-  // init
-  renderEmpty();
-  qEl.focus();
+  renderEmpty();qEl.focus();
 })();
 
 </script>
