@@ -1,0 +1,1388 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Katalog">
+<meta name="theme-color" content="#14171C">
+<title>Katalog otpada — indeksni brojevi</title>
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%2314171C'/%3E%3Ctext x='90' y='118' font-family='monospace' font-size='96' font-weight='700' fill='%23F5A623' text-anchor='middle'%3E%E2%97%88%3C/text%3E%3C/svg%3E">
+<style>
+  :root{
+    --bg:#14171C;
+    --surface:#1B2026;
+    --surface-2:#222a32;
+    --line:#2A323B;
+    --line-soft:#222a32;
+    --ink:#EBEEF2;
+    --ink-dim:#9AA4AF;
+    --ink-faint:#6B7681;
+    --hazard:#F5A623;
+    --hazard-bg:#3a2a0c;
+    --hazard-line:#5c4214;
+    --safe:#36D29A;
+    --safe-bg:#0e2a22;
+    --safe-line:#1c5040;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--sans);
+    line-height:1.45;
+    -webkit-font-smoothing:antialiased;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    min-height:100vh;
+  }
+  .wrap{max-width:560px;margin:0 auto;padding:18px 16px 40px;}
+
+  /* Header */
+  header{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:16px;}
+  .brand{font-weight:700;font-size:15px;letter-spacing:.02em;}
+  .brand .mark{color:var(--hazard);}
+  .sub{font-size:12px;color:var(--ink-faint);letter-spacing:.04em;text-transform:uppercase;}
+
+  /* Mode toggle */
+  .modes{display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:4px;margin-bottom:10px;}
+  .modes button{
+    flex:1;border:0;background:transparent;color:var(--ink-dim);
+    font-family:var(--sans);font-size:14px;font-weight:600;padding:9px 8px;border-radius:9px;cursor:pointer;
+  }
+  .modes button[aria-selected="true"]{background:var(--surface-2);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line);}
+
+  /* Search field */
+  .field{position:relative;margin-bottom:10px;}
+  #q{
+    width:100%;background:var(--surface);border:1px solid var(--line);
+    border-radius:14px;color:var(--ink);
+    font-family:var(--mono);font-size:30px;font-weight:600;letter-spacing:.06em;
+    padding:18px 52px 18px 18px;outline:none;
+  }
+  #q::placeholder{color:var(--ink-faint);font-weight:500;letter-spacing:.02em;}
+  #q:focus{border-color:var(--hazard);}
+  body.name-mode #q{font-family:var(--sans);font-size:19px;font-weight:500;letter-spacing:0;padding-right:52px;}
+  .clear{
+    position:absolute;right:10px;top:50%;transform:translateY(-50%);
+    width:34px;height:34px;border:0;border-radius:50%;background:var(--surface-2);
+    color:var(--ink-dim);font-size:18px;line-height:1;cursor:pointer;display:none;
+  }
+  .clear.show{display:flex;align-items:center;justify-content:center;}
+
+  /* Results */
+  .meta{font-size:12px;color:var(--ink-faint);margin:2px 2px 12px;min-height:16px;}
+  ul.list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;}
+  .row{
+    background:var(--surface);border:1px solid var(--line-soft);border-radius:12px;
+    padding:13px 14px;cursor:pointer;display:flex;align-items:center;gap:12px;
+    transition:border-color .12s ease;
+  }
+  .row:active{border-color:var(--hazard);}
+  .dot{width:9px;height:9px;border-radius:50%;flex:none;}
+  .dot.h{background:var(--hazard);box-shadow:0 0 0 3px var(--hazard-bg);}
+  .dot.s{background:var(--safe);box-shadow:0 0 0 3px var(--safe-bg);}
+  .row .code{font-family:var(--mono);font-size:15px;font-weight:600;letter-spacing:.05em;flex:none;width:84px;}
+  .row .nm{font-size:13.5px;color:var(--ink-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .row .chev{margin-left:auto;color:var(--ink-faint);flex:none;}
+
+  /* Detail card */
+  .card{border-radius:16px;border:1px solid var(--line);overflow:hidden;}
+  .card.hazard{border-color:var(--hazard-line);}
+  .card.safe{border-color:var(--safe-line);}
+  .card .top{padding:18px 18px 16px;}
+  .card.hazard .top{background:linear-gradient(180deg,var(--hazard-bg),transparent);}
+  .card.safe .top{background:linear-gradient(180deg,var(--safe-bg),transparent);}
+  .badge{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:5px 10px;border-radius:20px;}
+  .badge.h{color:var(--hazard);background:var(--hazard-bg);border:1px solid var(--hazard-line);}
+  .badge.s{color:var(--safe);background:var(--safe-bg);border:1px solid var(--safe-line);}
+  .bigcode{font-family:var(--mono);font-size:38px;font-weight:700;letter-spacing:.08em;margin:12px 0 2px;}
+  .bigcode .star{color:var(--hazard);}
+  .naziv{font-size:18px;line-height:1.4;color:var(--ink);margin-top:8px;}
+  .ctx{border-top:1px solid var(--line);padding:14px 18px;display:flex;flex-direction:column;gap:11px;}
+  .ctx .k{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:2px;}
+  .ctx .v{font-size:14px;color:var(--ink-dim);}
+  .ctx .v b{color:var(--ink);font-weight:600;}
+  .actions{display:flex;gap:8px;padding:0 18px 18px;}
+  .actions button{
+    flex:1;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);
+    font-family:var(--sans);font-size:14px;font-weight:600;padding:11px;border-radius:11px;cursor:pointer;
+  }
+  .actions button:active{border-color:var(--hazard);}
+
+  /* Group chips (empty state) */
+  .empty{margin-top:6px;}
+  .empty h2{font-size:13px;font-weight:600;color:var(--ink-faint);letter-spacing:.04em;text-transform:uppercase;margin:0 2px 10px;}
+  .chips{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
+  .chip{
+    background:var(--surface);border:1px solid var(--line-soft);border-radius:12px;
+    padding:12px 13px;cursor:pointer;text-align:left;display:flex;gap:11px;align-items:flex-start;
+  }
+  .chip:active{border-color:var(--hazard);}
+  .chip .gn{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--hazard);flex:none;}
+  .chip .gt{font-size:12px;color:var(--ink-dim);line-height:1.35;}
+  .none{color:var(--ink-faint);font-size:14px;padding:18px 2px;}
+  footer{margin-top:26px;text-align:center;font-size:11px;color:var(--ink-faint);line-height:1.6;}
+  .toast{
+    position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);
+    background:var(--ink);color:var(--bg);font-size:13px;font-weight:600;padding:10px 16px;border-radius:10px;
+    opacity:0;pointer-events:none;transition:.2s;z-index:10;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .back{display:none;background:transparent;border:0;color:var(--hazard);font-family:var(--sans);font-size:14px;font-weight:600;padding:6px 0;margin-bottom:10px;cursor:pointer;}
+  .back.show{display:inline-flex;align-items:center;gap:6px;}
+</style>
+</head>
+<body class="num-mode">
+<div class="wrap">
+  <header>
+    <div class="brand"><span class="mark">◈</span> Katalog otpada</div>
+    <div class="sub">Jugo-Impex</div>
+  </header>
+
+  <div class="modes" role="tablist">
+    <button id="m-num" role="tab" aria-selected="true">Indeksni broj</button>
+    <button id="m-name" role="tab" aria-selected="false">Naziv otpada</button>
+  </div>
+
+  <div class="field">
+    <input id="q" inputmode="numeric" autocomplete="off" autocorrect="off" spellcheck="false"
+           placeholder="npr. 16 01 03" aria-label="Pretraga">
+    <button class="clear" id="clear" aria-label="Obriši">✕</button>
+  </div>
+
+  <div class="meta" id="meta"></div>
+  <button class="back" id="back">‹ Nazad na rezultate</button>
+  <div id="out"></div>
+</div>
+<div class="toast" id="toast">Kopirano</div>
+
+<script id="data" type="text/plain">
+@01 Otpadi koji nastaju u istraživanjima, iskopavanjima iz rudnika ili kamenoloma i fizičkom i hemijskom tretmanu minerala
+>0101 otpadi od iskopavanja minerala
+010101 otpadi od iskopavanja minerala za crnu metalurgiju
+010102 otpadi od iskopavanja minerala za obojenu metalurgiju
+>0103 otpadi od fizičke i hemijske obrade minerala za crnu metalurgiju
+010304* jalovine iz prerade sulfidne rude koje stvaraju kiselinu
+010305* druge jalovine koje sadrže opasne supstance
+010306 jalovine drugačije od onih navedenih u 01 03 04 i 01 03 05
+010307* ostali otpadi iz fizičkog i hemijskog tretmana minerala za crnu metalurgiju koji sadrže opasne supstance
+010308 prašnjavi i praškasti otpadi drugačiji od onih navedenih u 01 03 07
+010309 crveni mulj iz proizvodnje aluminijuma drugačiji od onog navedenog u 01 03 07
+010399 otpadi koji nisu drugačije specificirani
+>0104 otpadi iz fizičke i hemijske obrade minerala za obojenu metalurgiju
+010407* otpadi iz fizičke i hemijske obrade minerala za obojenu metalurgiju koji sadrže opasne supstance
+010408 otpadni šljunak i drobljeni kamen drugačiji od onih navedenih u 01 04 07
+010409 otpadni pesak i gline
+010410 prašnjavi praškasti otpadi drugačiji od onih navedenih u 01 04 07
+010411 otpadi od prerade potaše i kamene soli drugačiji od onih navedenih u 01 04 07
+010412 ostaci i drugi otpadi od pranja i čišćenja minerala drugačiji od onih navedenih u 01 04 07 i 01 04 11
+010413 otpadi od sečenja i obrade kamena drugačiji od onih navedenih u 01 04 07
+010499 otpadi koji nisu drugačije specificirani
+>0105 muljevi nastali bušenjem i drugi otpadi od bušenja
+010504 muljevi i otpadi od bušenja za izvorišta pitke vode
+010505* muljevi i otpadi od bušenja koji sadrže naftu
+010506* muljevi od bušenja i drugi otpadi od bušenja koji sadrže opasne supstance
+010507 muljevi od bušenja i otpadi koji sadrže barit drugačiji od onih navedenih u 01 05 05 i 01 05 06
+010508 muljevi od bušenja i otpadi koji sadrže hloride drugačiji od onih navedenih u 01 05 05 i 01 05 06
+010599 otpadi koji nisu drugačije specificirani
+
+@02 Otpadi iz poljoprivrede, hortikulture, akvakulture, šumarstva, lova i ribolova, pripreme i prerade hrane
+>0201 Otpadi iz poljoprivrede, hortikulture, akvakulture, šumarstva, lova i ribolova
+020101 muljevi od pranja i čišćenja
+020102 otpad od životinjskog tkiva
+020103 otpad od biljnog tkiva
+020104 otpadna plastika (isključujući ambalažu)
+020106 životinjski feces, urin i đubrivo (uključujući i otpadnu slamu), tečni otpad, sakupljen odvojeno i tretiran van mesta nastajanja
+020107 otpadi iz šumarstva
+020108* agrohemijski otpad koji sadrži opasne supstance
+020109 agrohemijski otpad drugačiji od onog navedenog u 02 01 08
+020110 otpad od metala
+020199 otpadi koji nisu drugačije specificirani
+>0202 otpadi od pripreme i obrade mesa, ribe i druge hrane životinjskog porekla
+020201 muljevi od pranja i čišćenja
+020202 otpad od životinjskog tkiva
+020203 materijali nepodobni za potrošnju ili obradu
+020204 muljevi od tretmana tečnog otpada na mestu nastajanja
+020299 otpadi koji nisu drugačije specificirani
+>0203 otpadi od pripreme i prerade voća, povrća, žitarica, jestivih ulja, kakaa, kafe, čaja i duvana; proizvodnje konzervisane hrane; prerade duvana; proizvodnje kvasca i ekstrakta kvasca; pripreme i fermentacije melase
+020301 muljevi od pranja, čišćenja, ljuštenja, centrifugiranja i separacije
+020302 otpadi od konzervansa
+020303 otpadi od ekstrakcije rastvaračima
+020304 materijali nepodobni za potrošnju ili obradu
+020305 muljevi od tretmana tečnog otpada na mestu nastajanja
+020399 otpadi koji nisu drugačije specificirani
+>0204 otpadi od prerade šećera
+020401 zemlja od čišćenja i pranja šećerne repe
+020402 kalcijum karbonat van specifikacije
+020403 muljevi od tretmana tečnog otpada na mestu nastajanja
+020499 otpadi koji nisu drugačije specificirani
+>0205 otpadi od industrije mlečnih proizvoda
+020501 materijali nepodobni za potrošnju ili obradu
+020502 muljevi od tretmana tečnog otpada na mestu nastajanja
+020599 otpadi koji nisu drugačije specificirani
+>0206 otpadi od industrije peciva i konditorske industrije
+020601 materijali nepodobni za potrošnju ili obradu
+020602 otpadi od konzervansa
+020603 muljevi od tretmana tečnog otpada na mestu nastajanja
+020699 otpadi koji nisu drugačije specificirani
+>0207 otpadi od proizvodnje alkoholnih i bezalkoholnih napitaka (izuzev kafe, čaja i kakaa)
+020701 otpadi od pranja, čišćenja i mehaničkog tretmana sirovog materijala
+020702 otpadi od destilacije alkohola
+020703 otpadi od hemijskog tretmana
+020704 materijali nepodobni za potrošnju ili obradu
+020705 muljevi od tretmana tečnog otpada na mestu nastajanja
+020799 otpadi koji nisu drugačije specificirani
+
+@03 Otpadi od prerade drveta i proizvodnje papira, kartona, pulpe, panela i nameštaja
+>0301 otpadi od prerade drveta i proizvodnje panela i nameštaja
+030101 otpadna kora i pluta
+030104* piljevine, iverje, strugotine, drvo, iverica i furnir koji sadrže opasne supstance
+030105 piljevine, iverje, strugotine, drvo, iverica i furnir koji ne sadrže opasne supstance drugačije od onih navedenih u 03 01 04
+030199 otpadi koji nisu drugačije specificirani
+>0302 otpadi od zaštite drveta
+030201* nehalogenovana organska zaštitna sredstva za drvo
+030202* organohlorna zaštitna sredstva za drvo
+030203* organometalna zaštitna sredstva za drvo
+030204* neorganska zaštitna sredstva za drvo
+030205* druga zaštitna sredstva koji sadrže opasne supstance
+030299 otpadi koji nisu drugačije specificirani
+>0303 otpadi od proizvodnje i prerade pulpe, papira i kartona
+030301 otpad od kore i drvni otpad
+030302 zeleni tečni mulj nastao obnavljanjem kuvane (bele) tečnosti
+030305 muljevi od uklanjanja štamparskih boja u procesu reciklaže papira
+030307 mehanički izdvojeni nepotrebni sastojci pri proizvodnji pulpe od otpadnog papira i kartona
+030308 otpadi od sortiranja papira i kartona namenjenih reciklaži
+030309 krečni otpadni mulj
+030310 ostaci vlakana, muljevi od vlakana, punioca i prevlaka iz mehaničke separacije
+030311 muljevi iz tretmana otpadne vode na mestu nastajanja
+030399 otpadi koji nisu drugačije specificirani
+
+@04 Otpadi iz tekstilne, krznarske i kožarske industrije
+>0401 otpadi iz industrije kože i krzna
+040101 otpadi od uklanjanja drugog tkiva sa kože
+040102 krečni otpad
+040103* otpadi od odmašćivanja koji sadrže rastvarače, bez tečne faze
+040104 tečnost za štavljenje koja sadrži hrom
+040105 tečnost za štavljenje bez hroma
+040106 muljevi koji sadrže hrom, posebno muljevi iz tretmana otpadne vode na mestu nastajanja
+040107 muljevi bez hroma, posebno muljevi iz tretmana otpadne vode na mestu nastajanja
+040108 otpad od uštavljene kože (otpad od skidanja dlaka, sečenja, prašina od glancanja) koji sadrži hrom
+040109 otpadi od krojenja i završne obrade
+040199 otpadi koji nisu drugačije specificirani
+>0402 otpadi iz tekstilne industrije
+040209 otpadi od mešovitih materijala (impregnirani tekstil, elastomer, plastomer)
+040210 organska materija iz prirodnih proizvoda (npr. mast, vosak)
+040214* otpadi iz završne obrade koji sadrže organske rastvarače
+040215 otpadi iz završne obrade drugačiji od onih navedenih u 04 02 14
+040216* boje i pigmenti koji sadrže opasne supstance
+040217 boje i pigmenti koji ne sadrže opasne supstance drugačiji od onih navedenih u 04 02 16
+040219* muljevi iz tretmana otpadnih voda na mestu nastajanja koji sadrže opasne supstance
+040220 muljevi iz tretmana otpadnih voda na mestu nastajanja drugačiji od onih navedenih u 04 02 19
+040221 otpadi od neprerađenih tekstilnih vlakana
+040222 otpadi od prerađenih tekstilnih vlakana
+040299 otpadi koji nisu drugačije specificirani
+
+@05 Otpadi od rafinisanja nafte, prečišćavanja prirodnog gasa i pirolitičkog tretmana uglja
+>0501 otpadi od rafinacije nafte
+050102* muljevi od desalinacije
+050103* muljevi sa dna rezervoara
+050104* kiselo-bazni muljevi
+050105* mrlje istekle nafte
+050106* zauljeni muljevi od postupaka održavanja pogona i opreme
+050107* kiseli katran
+050108* ostali katran
+050109* muljevi iz tretmana otpadnih voda na mestu nastajanja koji sadrže opasne supstance
+050110 muljevi iz tretmana otpadnih voda na mestu nastajanja drugačiji od onih navedenih u 05 01 09
+050111* otpadi od prečišćavanja goriva bazama
+050112* ulja koja sadrže kiseline
+050113 muljevi od vode iz kotla
+050114 otpadi iz rashladnih kolona
+050115* utrošene filterske gline
+050116 otpadi koji sadrže sumpor iz desulfurizacije nafte
+050117 bitumen
+050199 otpadi koji nisu drugačije specificirani
+>0506 otpadi od pirolitičkog tretmana uglja
+050601* kiseli katran
+050603* ostali katran
+050604 otpad iz kolona za hlađenje
+050699 otpadi koji nisu drugačije specificirani
+>0507 otpadi od prečišćavanja prirodnog gasa i transporta
+050701* otpadi koji sadrže živu
+050702 otpadi koji sadrže sumpor
+050799 otpadi koji nisu drugačije specificirani
+
+@06 Otpadi od neorganskih hemijskih procesa
+>0601 otpadi od proizvodnje, formulacije, snabdevanja i upotrebe kiselina
+060101* sumporna i sumporasta kiselina
+060102* hlorovodonična kiselina
+060103* fluorovodonična kiselina
+060104* fosforna i fosforasta kiselina
+060105* azotna i azotasta kiselina
+060106* ostale kiseline
+060199 otpadi koji nisu drugačije specificirani
+>0602 otpadi od proizvodnje, formulacije, snabdevanja i upotrebe baza
+060201* kalcijum hidroksid
+060203* amonijum hidroksid
+060204* natrijum hidroksid i kalijum hidroksid
+060205* ostale baze
+060299 otpadi koji nisu drugačije specificirani
+>0603 otpadi od proizvodnje, formulacije, snabdevanja i upotrebe soli i rastvora soli i oksida metala
+060311* čvrste soli i rastvori koji sadrže cijanide
+060313* čvrste soli i rastvori koji sadrže teške metale
+060314 čvrste soli i rastvori drugačiji od onih navedenih u 06 03 11 i 06 03 13
+060315* oksidi metala koji sadrže teške metale
+060316 oksidi metala drugačiji od onih navedenih u 06 03 15
+060399 otpadi koji nisu drugačije specificirani
+>0604 otpadi koji sadrže metale koji nisu navedeni u 06 03
+060403* otpadi koji sadrže arsen
+060404* otpadi koji sadrže živu
+060405* otpadi koji sadrže ostale teške metale
+060499 otpadi koji nisu drugačije specificirani
+>0605 muljevi od tretmana otpadnih voda na mestu nastajanja
+060502* muljevi od tretmana otpadnih voda na mestu nastajanja koji sadrže opasne supstance
+060503 muljevi od tretmana otpadnih voda na mestu nastajanja drugačiji od onih navedenih u 06 05 02
+>0606 otpadi od proizvodnje, formulacije, snabdevanja i upotrebe hemikalija koje sadrže sumpor, hemijskih procesa sa sumporom i procesa odsumporavanja
+060602* otpadi koji sadrže opasne sulfide
+060603 otpadi koji sadrže sulfide drugačije od onih navedenih u 06 06 02
+060699 otpadi koji nisu drugačije specificirani
+>0607 otpadi od proizvodnje, formulacije, snabdevanja i upotrebe halogena i hemijskih procesa sa halogenima
+060701* otpadi koji sadrže azbest od elektrolize
+060702* aktivni ugalj od proizvodnje hlora
+060703* mulj barijum sulfata koji sadrži živu
+060704* rastvori i kiseline, na primer kiseline iz kontaktnog procesa
+060799 otpadi koji nisu drugačije specificirani
+>0608 otpadi od proizvodnje, formulacije, snabdevanja i upotrebe silicijuma i derivata silicijuma
+060802* otpadi od opasnih materija koje sadrže silicijum
+060899 otpadi koji nisu drugačije specificirani
+>0609 otpadi od proizvodnje, formulacije, snabdevanja i upotrebe hemikalija koje sadrže fosfor i hemijskih procesa sa primenom fosfora
+060902 fosforna šljaka
+060903* otpadi od reakcija sa kalcijumom koji sadrže ili su kontaminirani opasnim supstancama
+060904 otpadi od reakcija sa kalcijumom drugačiji od onih navedenih u 06 09 03
+060999 otpadi koji nisu drugačije specificirani
+>0610 otpadi od proizvodnje, formulacije, snabdevanja i upotrebe hemikalija koje sadrže azot, hemijskih procesa sa azotom i proizvodnje đubriva
+061002* otpadi koji sadrže opasne supstance
+061099 otpadi koji nisu drugačije specificirani
+>0611 otpadi od proizvodnje neorganskih pigmenata i neprozirnih materija
+061101 otpadi od reakcija sa kalcijumom iz proizvodnje titan-dioksida
+061199 otpadi koji nisu drugačije specificirani
+>0613 otpadi od neorganskih hemijskih procesa koji nisu drugačije specificirani
+061301* neorganski pesticidi, sredstva za zaštitu drveta i drugi biocidi
+061302* potrošeni aktivni ugalj (osim 06 07 02)
+061303 ugljena čađ
+061304* otpadi od obrade azbesta
+061305* čađ
+061399 otpadi koji nisu drugačije specificirani
+
+@07 Otpadi od organskih hemijskih procesa
+>0701 otpadi od proizvodnje, formulacije, snabdevanja i upotrebe osnovnih organskih hemikalija
+070101* tečnosti za pranje na bazi vode i matične tečnosti
+070103* organski halogenovani rastvarači, tečnosti za pranje i matične tečnosti
+070104* ostali organski rastvarači, tečnosti za pranje i matične tečnosti
+070107* halogenovani talozi i ostaci od reakcija
+070108* ostali talozi i ostaci od reakcija
+070109* halogenovani filter - kolači (pogače), potrošeni apsorbenti
+070110* ostali filter - kolači (pogače), potrošeni apsorbenti
+070111* muljevi od tretmana otpadnih voda na mestu nastajanja koji sadrže opasne supstance
+070112 muljevi od tretmana otpadnih voda na mestu nastajanja drugačiji od onih navedenih u 07 01 11
+070199 otpadi koji nisu drugačije specificirani
+>0702 otpadi od proizvodnje, formulacije, snabdevanja i upotrebe plastike, sintetičke gume i sintetičkih vlakana
+070201* tečnosti za pranje na bazi vode i matične tečnosti
+070203* organski halogenovani rastvarači, tečnosti za pranje i matične tečnosti
+070204* ostali organski rastvarači, tečnosti za pranje i matične tečnosti
+070207* halogenovani talozi i ostaci od reakcija
+070208* ostali talozi i ostaci od reakcija
+070209* halogenovani filter - kolači (pogače), potrošeni apsorbenti
+070210* ostali filter - kolači (pogače), potrošeni apsorbenti
+070211* muljevi od tretmana otpadnih voda na mestu nastajanja koji sadrže opasne supstance
+070212 muljevi od tretmana otpadnih voda na mestu nastajanja drugačiji od onih navedenih u 07 02 11
+070213 otpadna plastika
+070214* otpadi od aditiva koji sadrže opasne supstance
+070215 otpadi od aditiva drugačiji od onih navedenih u 07 02 14
+070216* otpadi od opasnih materija koji sadrže silikone
+070217 otpadi koji sadrže silikone drugačije od onih navedenih u 07 02 16
+070299 otpadi koji nisu drugačije specificirani
+>0703 otpadi od proizvodnje, formulacije, snabdevanja i upotrebe organskih boja i pigmenata (osim 06 11)
+070301* tečnosti za pranje na bazi vode i matične tečnosti
+070303* organski halogenovani rastvarači, tečnosti za pranje i matične tečnosti
+070304* ostali organski rastvarači, tečnosti za pranje i matične tečnosti
+070307* halogenovani talozi i ostaci od reakcija
+070308* ostali talozi i ostaci od reakcija
+070309* halogenovani filter - kolači (pogače), potrošeni apsorbenti
+070310* ostali filter - kolači (pogače), potrošeni apsorbenti
+070311* muljevi od tretmana otpadnih voda na mestu nastajanja koji sadrže opasne supstance
+070312 muljevi od tretmana otpadnih voda na mestu nastajanja drugačiji od onih navedenih u 07 03 11
+070399 otpadi koji nisu drugačije specificirani
+>0704 otpadi od proizvodnje, formulacije, snabdevanja i upotrebe organskih pesticida (osim 02 01 08 i 02 01 09), sredstava za zaštitu drveta (osim 03 02) i drugih biocida
+070401* tečnosti za pranje na bazi vode i matične tečnosti
+070403* organski halogenovani rastvarači, tečnosti za pranje i matične tečnosti
+070404* ostali organski rastvarači, tečnosti za pranje i matične tečnosti
+070407* halogenovani talozi i ostaci od reakcija
+070408* ostali talozi i ostaci od reakcija
+070409* halogenovani filter - kolači (pogače), potrošeni apsorbenti
+070410* ostali filter - kolači (pogače), potrošeni apsorbenti
+070411* muljevi od tretmana otpadnih voda na mestu nastajanja koji sadrže opasne supstance
+070412 muljevi od tretmana otpadnih voda na mestu nastajanja drugačiji od onih navedenih u 07 04 11
+070413* čvrsti otpadi koji sadrže opasne supstance
+070499 otpadi koji nisu drugačije specificirani
+>0705 otpadi od proizvodnje, formulacije, snabdevanja i upotrebe farmaceutskih preparata
+070501* tečnosti za pranje na bazi vode i matične tečnosti
+070503* organski halogenovani rastvarači, tečnosti za pranje i matične tečnosti
+070504* ostali organski rastvarači, tečnosti za pranje i matične tečnosti
+070507* halogenovani talozi i ostaci od reakcija
+070508* ostali talozi i ostaci od reakcija
+070509* halogenovani filter - kolači (pogače), potrošeni apsorbenti
+070510* ostali filter - kolači (pogače), potrošeni apsorbenti
+070511* muljevi od tretmana otpadnih voda na mestu nastajanja koji sadrže opasne supstance
+070512 muljevi od tretmana otpadnih voda na mestu nastajanja drugačiji od onih navedenih u 07 05 11
+070513* čvrsti otpadi koji sadrže opasne supstance
+070514 čvrsti otpadi drugačiji od onih navedenih u 07 05 13
+070599 otpadi koji nisu drugačije specificirani
+>0706 otpadi od proizvodnje, formulacije, snabdevanja i upotrebe masti, masnoća, sapuna, deterdženata, dezinfekcionih i kozmetičkih sredstava
+070601* tečnosti za pranje na bazi vode i matične tečnosti
+070603* organski halogenovani rastvarači, tečnosti za pranje i matične tečnosti
+070604* ostali organski rastvarači, tečnosti za pranje i matične tečnosti
+070607* halogenovani talozi i ostaci od reakcija
+070608* ostali talozi i ostaci od reakcija
+070609* halogenovani filter - kolači (pogače), potrošeni apsorbenti
+070610* ostali filter - kolači (pogače), potrošeni apsorbenti
+070611* muljevi od tretmana otpadnih voda na mestu nastajanja koji sadrže opasne supstance
+070612 muljevi od tretmana otpadnih voda na mestu nastajanja drugačiji od onih navedenih u 07 06 11
+070699 otpadi koji nisu drugačije specificirani
+>0707 otpadi od proizvodnje, formulacije, snabdevanja i upotrebe finih hemikalija i hemijskih proizvoda koji nisu drugačije specificirani
+070701* tečnosti za pranje na bazi vode i matične tečnosti
+070703* organski halogenovani rastvarači, tečnosti za pranje i matične tečnosti
+070704* ostali organski rastvarači, tečnosti za pranje i matične tečnosti
+070707* halogenovani talozi i ostaci od reakcija
+070708* ostali talozi i ostaci od reakcija
+070709* halogenovani filter - kolači (pogače), potrošeni apsorbenti
+070710* ostali filter - kolači (pogače), potrošeni apsorbenti
+070711* muljevi od tretmana otpadnih voda na mestu nastajanja koji sadrže opasne supstance
+070712 muljevi od tretmana otpadnih voda na mestu nastajanja drugačiji od onih navedenih u 07 07 11
+070799 otpadi koji nisu drugačije specificirani
+
+@08 Otpadi od proizvodnje, formulacije, snabdevanja i upotrebe premaza (boje, lakovi i staklene glazure), lepkova, zaptivača i štamparskih boja
+>0801 otpadi od proizvodnje, formulacije, snabdevanja i upotrebe i uklanjanja boja i lakova
+080111* otpadna boja i lak koji sadrže organske rastvarače ili druge opasne supstance
+080112 otpadna boja i lak drugačiji od onih navedenih u 08 01 11
+080113* muljevi od boje ili laka koji sadrže organske rastvarače ili druge opasne supstance
+080114 muljevi od boje ili laka drugačiji od onih navedenih u 08 01 13
+080115* muljevi na bazi vode koje sadrže boju ili lak na bazi organskih rastvarača ili drugih opasnih supstanci
+080116 muljevi od boje ili laka drugačiji od onih navedenih u 08 01 15
+080117* otpadi od uklanjanja boje ili laka koji sadrže organske rastvarače ili druge opasne supstance
+080118 otpadi od uklanjanja boje ili laka drugačiji od onih navedenih u 08 01 17
+080119* vodene suspenzije koje sadrže boju ili lak na bazi organskih rastvarača ili drugih opasnih supstanci
+080120 vodene suspenzije koje sadrže boju ili lak drugačiji od onih navedenih u 08 01 19
+080121* otpad od tečnosti za uklanjanje boje ili laka
+080199 otpadi koji nisu drugačije specificirani
+>0802 otpadi od proizvodnje, formulacije, snabdevanja i upotrebe ostalih premaza (uključujući keramičke materijale)
+080201 otpadni praškasti premazi
+080202 muljevi na bazi vode koji sadrže keramičke materijale
+080203 vodene suspenzije koje sadrže keramičke materijale
+080299 otpadi koji nisu drugačije specificirani
+>0803 otpadi od proizvodnje, formulacije, snabdevanja i upotrebe štamparskog mastila
+080307 muljevi na bazi vode koji sadrže mastilo
+080308 tečni otpad na bazi vode koji sadrži mastilo
+080312* otpadno mastilo koje sadrži opasne supstance
+080313 otpadno mastilo drugačije od onog navedenog u 08 03 12
+080314* muljevi od mastila koje sadrži opasne supstance
+080315 muljevi od mastila drugačiji od onih navedenih u 08 03 14
+080316* otpadni rastvori za ecovanje
+080317* otpadni toner za štampanje koje sadrži opasne supstance
+080318 otpadni toner za štampanje drugačiji od onog navedenog u 08 03 17
+080319* dispergovana ulja
+080399 otpadi koji nisu drugačije specificirani
+>0804 otpadi od proizvodnje, formulacije, snabdevanja i upotrebe lepkova i zaptivača (uključujući i vodootporne proizvode)
+080409* otpadni lepkovi i zaptivači koji sadrže organske rastvarače ili druge opasne supstance
+080410 otpadni lepkovi i zaptivači drugačiji od onih navedenih u 08 04 09
+080411* muljevi od lepkova i zaptivača koji sadrže organske rastvarače ili druge opasne supstance
+080412 muljevi od lepkova i zaptivača drugačiji od onih navedenih u 08 04 11
+080413* muljevi na bazi vode koji sadrže lepkove ili zaptivače koji sadrže organske rastvarače ili druge opasne supstance
+080414 muljevi na bazi vode koji sadrže lepkove ili zaptivače drugačiji od onih navedenih u 08 04 13
+080415* tečni otpad na bazi vode koji sadrži lepkove ili zaptivače koji sadrže organske rastvarače ili druge opasne supstance
+080416 tečni otpad na bazi vode koji sadrži lepkove ili zaptivače drugačiji od onih spomenutih u 08 04 15
+080417* ulje od destilacije smola
+080499 otpadi koji nisu drugačije specificirani
+>0805 otpadi koji nisu drugačije specificirani u 08
+080501* otpadni izocijanati
+
+@09 Otpadi iz fotografske industrije
+>0901 otpadi iz fotografske industrije
+090101* rastvori razvijača i aktivatora na bazi vode
+090102* rastvori razvijača za offset ploče na bazi vode
+090103* rastvori razvijača na bazi rastvarača
+090104* rastvori sredstava za fiksiranje
+090105* rastvori za izbeljivanje i rastvori sredstava za fiksiranje izbeljenosti
+090106* otpadi koji sadrže srebro od tretmana fotografskog otpada na mestu nastajanja
+090107 fotografski film i papir koji sadrži srebro ili jedinjenja srebra
+090108 fotografski film i papir koji ne sadrži srebro ili jedinjenja srebra
+090110 kamere za jednokratnu upotrebu bez baterija
+090111* kamere za jednokratnu upotrebu koje sadrže baterije navedene u 16 06 01, 16 06 02 ili 16 06 03
+090112 kamere za jednokratnu upotrebu koje sadrže baterije drugačije od onih navedenih u 09 01 11
+090113* tečni otpad na bazi vode od obnavljanja srebra na mestu nastajanja drugačiji od onog navedenog u 09 01 06
+090199 otpadi koji nisu drugačije specificirani
+
+@10 Otpadi iz termičkih procesa
+>1001 otpadi iz energana i drugih postrojenja za sagorevanje (osim 19)
+100101 pepeo, šljaka i prašina iz kotla (izuzev prašine iz kotla navedene u 10 01 04)
+100102 leteći pepeo od uglja
+100103 leteći pepeo treseta i sirovog drveta
+100104* leteći pepeo od sagorevanja nafte i prašina iz kotla
+100105 čvrsti otpadi na bazi kalcijuma u procesu odsumporavanja gasa
+100107 muljevi na bazi kalcijuma u procesu odsumporavanja gasa
+100109* sumporna kiselina
+100113* leteći pepeo od emulgovanih ugljovodonika upotrebljenih kao gorivo
+100114* šljaka i prašina iz kotla iz procesa ko-spaljivanja, koja sadrži opasne supstance
+100115 šljaka i prašina iz kotla iz procesa ko-spaljivanja drugačiji od onih navedenih u 10 01 14
+100116* leteći pepeo iz procesa ko-spaljivanja koji sadrži opasne supstance
+100117 leteći pepeo iz procesa ko-spaljivanja drugačiji od onog navedenog u 10 01 16
+100118* otpadi iz prečišćavanja gasa koji sadrže opasne supstance
+100119 otpadi iz prečišćavanja gasa drugačiji od onih navedenih u 10 01 05, 10 01 07, 10 01 18
+100120* muljevi iz tretmana otpadnih voda na mestu nastajanja koji sadrže opasne supstance
+100121 muljevi iz tretmana otpadnih voda na mestu nastajanja drugačiji od onih navedenih u 10 01 20
+100122* muljevi na bazi vode od čišćenja kotla koji sadrže opasne supstance
+100123 muljevi na bazi vode od čišćenja kotla drugačiji od onih navedenih u 10 01 22
+100124 peskovi iz fluidizovanog sloja
+100125 otpadi od skladištenja goriva i pripreme energana koji koriste ugalj
+100126 otpadi iz tretmana rashladne vode
+100199 otpadi koji nisu drugačije specificirani
+>1002 otpadi iz industrije gvožđa i čelika
+100201 otpadi od prerade šljake
+100202 neprerađena šljaka
+100207* čvrsti otpadi iz procesa tretmana gasa koji sadrže opasne supstance
+100208 čvrsti otpadi iz procesa tretmana gasa drugačiji od onih navedenih u 10 02 07
+100210 otpad od mlevenja
+100211* zauljeni otpadi iz tretmana rashladne vode
+100212 otpadi iz tretmana rashladne vode drugačiji od onih navedenih u 10 02 11
+100213* muljevi i filter - kolači (pogače) iz procesa tretmana gasa koji sadrže opasne supstance
+100214 muljevi i filter - kolači (pogače) iz procesa tretmana gasa drugačiji od onih spomenutih u 10 02 13
+100215 drugi muljevi i filter - kolači (pogače)
+100299 otpadi koji nisu drugačije specificirani
+>1003 otpadi iz termičke metalurgije aluminijuma
+100302 ostaci anoda
+100304* šljake iz primarne proizvodnje
+100305 otpadna glinica
+100308* slane šljake iz sekundarne proizvodnje
+100309* crna zgura iz sekundarne proizvodnje
+100315* plivajuća pena/šljaka koja je zapaljiva ili koja u dodiru sa vodom emituje zapaljive gasove u opasnim količinama
+100316 plivajuća pena/šljaka drugačiji od onih navedenih u 10 03 15
+100317* otpadi koji sadrže katran iz anodnog procesa
+100318 otpadi koji sadrže ugljenik iz anodnog procesa drugačiji od onih navedenih u 10 03 17
+100319* prašina dimnog gasa koja sadrži opasne supstance
+100320 prašina dimnog gasa drugačija od one navedene u 10 03 19
+100321* ostale čvrste čestice i prašina (uključujući prašinu iz mlina sa kuglama) koji sadrže opasne supstance
+100322 ostale čvrste čestice i prašina (uključujući prašinu iz mlina sa kuglama) drugačiji od onih navedenih u 10 03 21
+100323* čvrsti otpadi iz tretmana gasa koji sadrže opasne supstance
+100324 čvrsti otpadi iz tretmana gasa drugačiji od onih navedenih u 10 03 23
+100325* muljevi i filter - kolači (pogače) od tretmana gasa koji sadrže opasne supstance
+100326 muljevi i filter - kolači (pogače) od tretmana gasa drugačiji od onih navedenih u 10 03 25
+100327* zauljeni otpadi iz tretmana rashladne vode
+100328 otpadi iz tretmana rashladne vode drugačiji od onih navedenih u 10 03 27
+100329* otpadi od tretmana slanih šljaka i crne zgure koji sadrže opasne supstance
+100330 otpadi od tretmana slanih šljaka i crne zgure drugačiji od onih navedenih u 10 03 29
+100399 otpadi koji nisu drugačije specificirani
+>1004 otpadi iz termičke metalurgije olova
+100401* šljake iz primarne i sekundarne proizvodnje
+100402* zgura i plivajuća pena/šljaka iz primarne i sekundarne proizvodnje
+100403* kalcijum arsenat
+100404* prašina dimnog gasa
+100405* ostale čvrste čestice i prašina
+100406* čvrsti otpadi iz tretmana gasa
+100407* muljevi i filter - kolači (pogače) iz tretmana gasa
+100409* zauljeni otpadi iz tretmana rashladne vode
+100410 otpadi iz tretmana rashladne vode drugačiji od onih navedenih u 10 04 09
+100499 otpadi koji nisu drugačije specificirani
+>1005 otpadi iz termičke metalurgije cinka
+100501 šljake iz primarne i sekundarne proizvodnje
+100503* prašina dimnog gasa
+100504 ostale čvrste čestice i prašina
+100505* čvrsti otpad iz tretmana gasa
+100506* muljevi i filter - kolači (pogače) iz tretmana gasa
+100508* zauljeni otpadi iz tretmana rashladne vode
+100509 otpadi iz tretmana rashladne vode drugačiji od onih navedenih u 10 05 08
+100510* zgura i plivajuća pena/šljaka koja je zapaljiva ili koja u dodiru sa vodom emituje zapaljive gasove u opasnim količinama
+100511 zgura i plivajuća pena/šljaka drugačiji od onih navedenih u 10 05 10
+100599 otpadi koji nisu drugačije specificirani
+>1006 otpad iz termičke metalurgije bakra
+100601 šljake iz primarne i sekundarne proizvodnje
+100602 zgura i plivajuća pena/šljaka iz primarne i sekundarne proizvodnje
+100603* prašina dimnog gasa
+100604 ostale čvrste čestice i prašina
+100606* čvrsti otpadi iz tretmana gasa
+100607* muljevi i filter - kolači (pogače) iz tretmana gasa
+100609* zauljeni otpadi iz tretmana rashladne vode
+100610 otpadi iz tretmana rashladne vode drugačiji od onih navedenih u 10 06 09
+100699 otpadi koji nisu drugačije specificirani
+>1007 otpadi iz termičke metalurgije srebra, zlata i platine
+100701 šljake iz primarne i sekundarne proizvodnje
+100702 zgura i plivajuća pena/šljaka iz primarne i sekundarne proizvodnje
+100703 čvrsti otpadi iz tretmana gasa
+100704 ostale čvrste čestice i prašina
+100705 muljevi i filter - kolači (pogače) iz tretmana gasa
+100707* zauljeni otpadi iz tretmana rashladne vode
+100708 otpadi iz tretmana rashladne vode drugačiji od onih navedenih u 10 07 07
+100799 otpadi koji nisu drugačije specificirani
+>1008 otpadi iz termičke metalurgije ostalih obojenih metala
+100804 čvrste čestice i prašina
+100808* slana šljaka iz primarne i sekundarne proizvodnje
+100809 ostale šljake
+100810* zgura i plivajuća pena/šljaka koja je zapaljiva ili koja u dodiru sa vodom emituje zapaljive gasove u opasnim količinama
+100811 zgura i plivajuća pena/šljaka drugačiji od onih navedenih u 10 08 10
+100812* otpadi koji sadrže katran iz anodnog procesa
+100813 otpadi koji sadrže ugljenik iz anodnog procesa drugačiji od onih navedenih u 10 08 12
+100814 strugotine sa anode
+100815* prašina dimnog gasa koja sadrži opasne supstance
+100816 prašina dimnog gasa drugačija od one navedene u 10 08 15
+100817* muljevi i filter - kolači (pogače) iz tretmana dimnog gasa koji sadrže opasne supstance
+100818 muljevi i filter - kolači (pogače) iz tretmana dimnog gasa drugačiji od onih navedenih u 10 08 17
+100819* zauljeni otpadi iz tretmana rashladne vode
+100820 otpadi iz tretmana rashladne vode drugačiji od onih navedenih u 10 08 19
+100899 otpadi koji nisu drugačije specificirani
+>1009 otpadi od livenja gvozdenih odlivaka
+100903 šljaka iz peći
+100905* jezgra i kalupi za livenje koji nisu prošli proces izlivanja i koji sadrže opasne supstance
+100906 jezgra i kalupi za livenje koji nisu prošli proces izlivanja drugačiji od onih navedenih u 10 09 05
+100907* jezgra i kalupi za livenje koji su prošli proces izlivanja i koji sadrže opasne supstance
+100908 jezgra i kalupi za livenje koji su prošli proces izlivanja drugačiji od onih navedenih u 10 09 07
+100909* prašina dimnog gasa koja sadrži opasne supstance
+100910 prašina dimnog gasa drugačija od one navedene u 10 09 09
+100911* ostale čvrste čestice koje sadrže opasne supstance
+100912 ostale čvrste čestice drugačije od onih navedenih u 10 09 11
+100913* otpadna veziva koja sadrže opasne supstance
+100914 otpadna veziva drugačija od onih navedenih u 10 09 13
+100915* otpadni indikator pukotina koji sadrži opasne supstance
+100916 otpadni indikator pukotina drugačiji od onog navedenog u 10 09 15
+100999 otpadi koji nisu drugačije specificirani
+>1010 otpadi od livenja odlivaka obojenih metala
+101003 šljaka iz peći
+101005* jezgra i kalupi za livenje koji nisu prošli proces izlivanja i koji sadrže opasne supstance
+101006 jezgra i kalupi za livenje koji nisu prošli proces izlivanja drugačiji od onih navedenih u 10 10 05
+101007* jezgra i kalupi za livenje koji su prošli proces izlivanja i koji sadrže opasne supstance
+101008 jezgra i kalupi za livenje koji su prošli proces izlivanja drugačiji od onih navedenih u 10 10 07
+101009* prašina dimnog gasa koja sadrži opasne supstance
+101010 prašina dimnog gasa drugačija od one navedene u 10 10 09
+101011* ostale čvrste čestice koje sadrže opasne supstance
+101012 ostale čvrste čestice drugačije od onih navedenih u 10 10 11
+101013* otpadna veziva koja sadrže opasne supstance
+101014 otpadna veziva drugačija od onih navedenih u 10 10 13
+101015* otpadni indikator pukotina koji sadrži opasne supstance
+101016 otpadni indikator pukotina drugačiji od onog navedenog u 10 10 15
+101099 otpadi koji nisu drugačije specificirani
+>1011 otpadi iz proizvodnje stakla i proizvoda od stakla
+101103 otpadni vlaknasti materijali na bazi stakla
+101105 čvrste čestice i prašina
+101109* otpadna pripremna mešavina koja se koristi pre termičkog tretmana koja sadrži opasne supstance
+101110 otpadna pripremna mešavina koja se koristi pre termičkog tretmana drugačija od one navedene u 10 11 09
+101111* otpadno staklo u malim komadima i staklena prašina koji sadrže teške metale (na primer od katodnih cevi)
+101112 otpadno staklo drugačije od onog navedenog u 10 11 11
+101113* mulj od poliranja i mlevenja stakla koji sadrži opasne supstance
+101114 mulj od poliranja i mlevenja stakla drugačiji od onog navedenog u 10 11 13
+101115* čvrsti otpadi iz tretmana dimnog gasa koji sadrže opasne supstance
+101116 čvrsti otpadi iz tretmana dimnog gasa drugačiji od onih navedenih u 10 11 15
+101117* muljevi i filter - kolači (pogače) iz tretmana dimnog gasa koji sadrže opasne supstance
+101118 muljevi i filter - kolači (pogače) iz tretmana dimnog gasa drugačiji od onih navedenih u 10 11 17
+101119* čvrsti otpadi od tretmana otpadnih voda na mestu nastajanja koji sadrže opasne supstance
+101120 čvrsti otpadi od tretmana otpadnih voda na mestu nastajanja drugačiji od onih navedenih u 10 11 19
+101199 otpadi koji nisu drugačije specificirani
+>1012 otpadi iz proizvodnje keramičkih proizvoda, cigli, pločica i proizvoda za građevinarstvo
+101201 otpadna pripremna mešavina pre termičkog tretmana
+101203 čvrste čestice i prašina
+101205 muljevi i filter - kolači (pogače) iz tretmana gasa
+101206 odbačeni kalupi
+101208 otpadna keramika, cigle, pločice i proizvodi za građevinarstvo (posle termičkog tretmana)
+101209* čvrsti otpadi iz tretmana gasa koji sadrže opasne supstance
+101210 čvrsti otpadi iz tretmana gasa drugačiji od onih navedenih u 10 12 09
+101211* otpadi iz procesa glaziranja koji sadrže teške metale
+101212 otpadi iz procesa glaziranja drugačiji od onih navedenih u 10 12 11
+101213 mulj iz tretmana otpadne vode na mestu nastajanja
+101299 otpadi koji nisu drugačije specificirani
+>1013 otpadi iz proizvodnje cementa, kreča i gipsa i predmeta i proizvoda koji se od njih proizvode
+101301 otpadna pripremna mešavina pre termičkog tretmana
+101304 otpadi od kalcinacije i hidratacije kreča
+101306 čvrste čestice i prašina (izuzev 10 13 12 i 10 13 13)
+101307 muljevi i filter - kolači (pogače) iz tretmana gasa
+101309* otpadi iz proizvodnje azbest cementa koji sadrže azbest
+101310 otpadi iz proizvodnje azbest cementa drugačiji od onih navedenih u 10 13 09
+101311 otpadi iz kompozitnih materijala na bazi cementa drugačiji od onih navedenih u 10 13 09 i 10 13 10
+101312* čvrsti otpadi iz tretmana gasa koji sadrže opasne supstance
+101313 čvrsti otpadi iz tretmana gasa drugačiji od onih navedenih u 10 13 12
+101314 otpadni beton i mulj od betona
+101399 otpadi koji nisu drugačije specificirani
+>1014 otpad iz krematorijuma
+101401* otpad iz prečišćavanja gasa koji sadrži živu
+
+@11 Otpadi od hemijskog tretmana površine i zaštite metala i drugih materijala; hidrometalurgija obojenih metala
+>1101 otpadi od hemijskog tretmana površine i zaštite metala i drugih materijala (npr. procesi galvanizacije, oblaganje cinkom, čišćenje kiselinom, radiranje, fosfatiranje, odmašćivanje bazama i anodizacija)
+110105* kiseline za čišćenje
+110106* kiseline koje nisu drugačije specificirane
+110107* baze za čišćenje
+110108* muljevi od fosfatiranja
+110109* muljevi i filter - kolači (pogače) koji sadrže opasne supstance
+110110 muljevi i filter - kolači (pogače) drugačiji od onih navedenih u 11 01 09
+110111* tečnosti za ispiranje na bazi vode koje sadrže opasne supstance
+110112 tečnosti za ispiranje na bazi vode drugačije od onih navedenih u 11 01 11
+110113* otpadi od odmašćivanja koji sadrže opasne supstance
+110114 otpadi od odmašćivanja drugačiji od onih navedenih u 11 01 13
+110115* eluati i muljevi iz membranskih ili jonoizmenjivačkih sistema koji sadrže opasne supstance
+110116* zasićene ili potrošene jonoizmenjivačke smole
+110198* ostali otpadi koji sadrže opasne supstance
+110199 otpadi koji nisu drugačije specificirani
+>1102 otpadi iz hidrometalurških procesa obojenih metala
+110202* muljevi iz hidrometalurgije cinka (uključujući jarosit i getit)
+110203 otpadi iz proizvodnje anoda za elektrolitičke procese u vodenoj sredini
+110205* otpadi iz hidrometalurških procesa bakra koji sadrže opasne supstance
+110206 otpadi iz hidrometalurških procesa bakra drugačiji od onih navedenih u 11 02 05
+110207* ostali otpadi koji sadrže opasne supstance
+110299 otpadi koji nisu drugačije specificirani
+>1103 muljevi i čvrsti otpadi iz procesa kaljenja
+110301* otpadi koji sadrže cijanide
+110302* ostali otpadi
+>1105 otpadi iz procesa vrele galvanizacije
+110501 tvrdi cink
+110502 pepeo od cinka
+110503* čvrsti otpadi iz tretmana gasa
+110504* potrošena tečnost
+110599 otpadi koji nisu drugačije specificirani
+
+@12 Otpadi od oblikovanja i fizičke i mehaničke površinske obrade metala i plastike
+>1201 otpadi od oblikovanja i fizičke i mehaničke površinske obrade metala i plastike
+120101 struganje i obrada ferometala
+120102 prašina i čestice ferometala
+120103 struganje i obrada obojenih metala
+120104 prašina i čestice obojenih metala
+120105 obrada plastike
+120106* mineralna mašinska ulja koja sadrže halogene (izuzev emulzija i rastvora)
+120107* mineralna mašinska ulja koja ne sadrže halogene (izuzev emulzija i rastvora)
+120108* mašinske emulzije i rastvori koje sadrže halogene
+120109* mašinske emulzije i rastvori koje ne sadrže halogene
+120110* sintetička mašinska ulja
+120112* potrošeni vosak i masti
+120113 otpadi od zavarivanja
+120114* mašinski muljevi koji sadrže opasne supstance
+120115 mašinski muljevi drugačiji od onih navedenih u 12 01 14
+120116* otpad od peskarenja koji sadrži opasne supstance
+120117 otpad od peskarenja drugačiji od onog navedenog u 12 01 16
+120118* metalni muljevi (od mlevenja, brušenja i oštrenja) koji sadrži ulje
+120119* odmah biorazgradivo mašinsko ulje
+120120* potrošena tela za mlevenje i materijali za mlevenje koji sadrže opasne supstance
+120121 potrošena tela za mlevenje i materijali za mlevenje drugačiji od onih navedenih u 12 01 20
+120199 otpadi koji nisu drugačije specificirani
+>1203 otpadi iz procesa odmašćivanja vodom i parom (izuzev 11)
+120301* tečnosti za pranje na bazi vode
+120302* otpadi od odmašćivanja parom
+
+@13 Otpadi od ulja i ostataka tečnih goriva (osim jestivih ulja i onih u poglavljima 05, 12 i 19)
+>1301 otpadna hidraulična ulja
+130101* hidraulična ulja koja sadrže PCB
+130104* hlorovane emulzije
+130105* nehlorovane emulzije
+130109* mineralna hlorovana hidraulična ulja
+130110* mineralna nehlorovana hidraulična ulja
+130111* sintetička hidraulična ulja
+130112* odmah biorazgradiva hidraulična ulja
+130113* ostala hidraulična ulja
+>1302 otpadna motorna ulja, ulja za menjače i podmazivanje
+130204* mineralna hlorovana motorna ulja, ulja za menjače i podmazivanje
+130205* mineralna nehlorovana motorna ulja, ulja za menjače i podmazivanje
+130206* sintetička motorna ulja, ulja za menjače i podmazivanje
+130207* odmah biorazgradiva motorna ulja, ulja za menjače i podmazivanje
+130208* ostala motorna ulja, ulja za menjače i podmazivanje
+>1303 otpadna ulja za izolaciju i prenos toplote
+130301* ulja za izolaciju i prenos toplote koja sadrže PCB
+130306* mineralna hlorovana ulja za izolaciju i prenos toplote
+130307* mineralna nehlorovana ulja za izolaciju i prenos toplote
+130308* sintetička ulja za izolaciju i prenos toplote
+130309* odmah biorazgradiva ulja za izolaciju i prenos toplote
+130310* ostala ulja za izolaciju i prenos toplote
+>1304 brodska ulja
+130401* ulja sa dna brodova iz rečne plovidbe
+130402* ulja sa dna brodova iz kanalizacije na pristaništu
+130403* ulja sa dna brodova iz ostale vrste plovidbe
+>1305 sadržaj separatora ulje/voda
+130501* čvrste materije iz peskolova i separatora ulje/voda
+130502* muljevi iz separatora ulje/voda
+130503* muljevi od hvatača ulja
+130506* ulja iz separatora ulje/voda
+130507* zauljena voda iz separatora ulje/voda
+130508* mešavine otpada iz komore za otpad i separatora ulje/voda
+>1307 otpadi od tečnih goriva
+130701* pogonsko gorivo i dizel
+130702* benzin
+130703* ostala goriva (uključujući mešavine)
+>1308 otpadna ulja koja nisu drugačije specificirana
+130801* muljevi ili emulzije od desalinacije
+130802* ostale emulzije
+130899* otpadi koji nisu drugačije specificirani
+
+@14 Otpadni organski rastvarači, sredstva za hlađenje i potisni gasovi (osim 07 i 08)
+>1406 otpadni organski rastvarači, sredstva za hlađenje i potisni gasovi na bazi pene/aerosola
+140601* hlorofluorougljovodonici, HCFC, HFC
+140602* ostali halogenovani rastvarači i smeše rastvarača
+140603* ostali rastvarači i smeše rastvarača
+140604* muljevi ili čvrsti otpadi koje sadrže halogenovane rastvarače
+140605* muljevi ili čvrsti otpadi koje sadrže ostale rastvarače
+
+@15 Otpad od ambalaže, apsorbenti, krpe za brisanje, filterski materijali i zaštitne tkanine, ako nije drugačije specificirano
+>1501 ambalaža (uključujući posebno sakupljenu ambalažu u komunalnom otpadu)
+150101 papirna i kartonska ambalaža
+150102 plastična ambalaža
+150103 drvena ambalaža
+150104 metalna ambalaža
+150105 kompozitna ambalaža
+150106 mešana ambalaža
+150107 staklena ambalaža
+150109 tekstilna ambalaža
+150110* ambalaža koja sadrži ostatke opasnih supstanci ili je kontaminirana opasnim supstancama
+150111* metalna ambalaža koja sadrži opasan čvrst porozni matriks (npr. azbest), uključujući i prazne boce pod pritiskom
+>1502 apsorbenti, filterski materijali, krpe za brisanje i zaštitna odeća
+150202* apsorbenti, filterski materijali (uključujući filtere za ulje koji nisu drugačije specificirani), krpe za brisanje, zaštitna odeća, koji su kontaminirani opasnim supstancama
+150203 apsorbenti, filterski materijali, krpe za brisanje i zaštitna odeća drugačiji od onih navedenih u 15 02 02
+
+@16 Otpadi koji nisu drugačije specificirani u katalogu
+>1601 otpadna vozila iz različitih vidova transporta (uključujući mehanizaciju) i otpadi nastali demontažom otpadnih vozila i od održavanja vozila (izuzev 13, 14, 16 06 i 16 08)
+160103 otpadne gume
+160104* otpadna vozila
+160106 otpadna vozila koja ne sadrže ni tečnosti ni druge opasne komponente
+160107* filteri za ulje
+160108* komponente koje sadrže živu
+160109* komponente koje sadrže PCB
+160110* eksplozivne komponente (npr. vazdušni jastuci)
+160111* kočione obloge koje sadrže azbest
+160112 kočione obloge drugačije od onih navedenih u 16 01 11
+160113* kočione tečnosti
+160114* antifriz koji sadrži opasne supstance
+160115 antifriz drugačiji od onog navedenog u 16 01 14
+160116 rezervoari za tečni gas
+160117 ferozni metal
+160118 obojeni metal
+160119 plastika
+160120 staklo
+160121* opasne komponente drugačije od onih navedenih u 16 01 07 do 16 01 11 i 16 01 13 i 16 01 14
+160122 komponente koje nisu drugačije specificirane
+160199 otpadi koji nisu drugačije specificirani
+>1602 otpadi od električne i elektronske opreme
+160209* transformatori i kondenzatori koji sadrže PCB
+160210* odbačena oprema koja sadrži ili je kontaminirana sa PCB, drugačija od one navedene u 16 02 09
+160211* odbačena oprema koja sadrži hlorofluorougljovodonike, HCFC, HFC
+160212* odbačena oprema koja sadrži slobodni azbest
+160213* odbačena oprema koja sadrži opasne komponente drugačija od one navedene u 16 02 09 do 16 02 12
+160214 odbačena oprema drugačija od one navedene u 16 02 09 do 16 02 13
+160215* opasne komponente uklonjene iz odbačene opreme
+160216 komponente uklonjene iz odbačene opreme drugačije od onih navedenih u 16 02 15
+>1603 komponente izvan specifikacije i nekorišćeni proizvodi
+160303* neorganski otpadi koji sadrže opasne supstance
+160304 neorganski otpadi drugačiji od onih navedenih u 16 03 03
+160305* organski otpadi koji sadrže opasne supstance
+160306 organski otpadi drugačiji od onih navedenih u 16 03 05
+>1604 otpadni eksplozivi
+160401* otpadna municija
+160402* otpadi od vatrometa
+160403* ostali otpadni eksplozivi
+>1605 gasovi u bocama pod pritiskom i odbačene hemikalije
+160504* gasovi u bocama pod pritiskom (uključujući halone) koji sadrže opasne supstance
+160505 gasovi u bocama pod pritiskom drugačiji od onih navedenih u 16 05 04
+160506* laboratorijske hemikalije koje se sastoje ili sadrže opasne supstance, uključujući smeše laboratorijskih hemikalija
+160507* odbačene neorganske hemikalije koje se sastoje ili sadrže opasne supstance
+160508* odbačene organske hemikalije koje se sastoje ili sadrže opasne supstance
+160509 odbačene hemikalije drugačije od onih navedenih u 16 05 06, 16 05 07 ili 16 05 08
+>1606 baterije i akumulatori
+160601* olovne baterije
+160602* baterije od nikl-kadmijuma
+160603* baterije koje sadrže živu
+160604 alkalne baterije (izuzev 16 06 03)
+160605 druge baterije i akumulatori
+160606* posebno sakupljen elektrolit iz baterija i akumulatora
+>1607 otpadi iz rezervoara za transport i skladištenje i otpad od čišćenja buradi (izuzev 05 i 13)
+160708* otpadi koji sadrže ulje
+160709* otpadi koji sadrže ostale opasne supstance
+160799 otpadi koji nisu drugačije specificirani
+>1608 istrošeni katalizatori
+160801 istrošeni katalizatori koji sadrže zlato, srebro, renijum, rodijum, paladijum, iridijum ili platinu (izuzev 16 08 07)
+160802* istrošeni katalizatori koji sadrže opasne prelazne metale ili opasna jedinjenja prelaznih metala
+160803 istrošeni katalizatori koji sadrže prelazne metale ili jedinjenja prelaznih metala koji nisu drugačije specificirani
+160804 istrošeni tečni katalizatori za katalitički kreking (izuzev 16 08 07)
+160805* istrošeni katalizatori koji sadrže fosfornu kiselinu
+160806* istrošene tečnosti upotrebljene kao katalizatori
+160807* istrošeni katalizatori kontaminirani opasnim supstancama
+>1609 oksidansi
+160901* permanganati, npr. kalijum permanganat
+160902* hromati, npr. kalijum hromat, kalijum- ili natrijum dihromat
+160903* peroksidi, npr. vodonik peroksid
+160904* oksidanti koji nisu drugačije specificirani
+>1610 tečni otpadi na bazi vode namenjeni tretmanu van mesta nastajanja
+161001* tečni otpadi na bazi vode koji sadrže opasne supstance
+161002 tečni otpadi na bazi vode drugačiji od onih navedenih u 16 10 01
+161003* koncentrati na bazi vode koji sadrže opasne supstance
+161004 koncentrati na bazi vode drugačiji od onih navedenih u 16 10 03
+>1611 otpadne obloge i vatrostalni materijali
+161101* obloge na bazi ugljenika i vatrostalni materijali iz metalurških procesa koji sadrže opasne supstance
+161102 obloge na bazi ugljenika i vatrostalni materijali iz metalurških procesa drugačiji od onih navedenih u 16 11 01
+161103* ostale obloge i vatrostalni materijali iz metalurških procesa koji sadrže opasne supstance
+161104 ostale obloge i vatrostalni materijali iz metalurških procesa drugačiji od onih navedenih u 16 11 03
+161105* obloge i vatrostalni materijali iz nemetalurških procesa koji sadrže opasne supstance
+161106 obloge i vatrostalni materijali iz nemetalurških procesa drugačiji od onih navedenih u 16 11 05
+
+@17 Građevinski otpad i otpad od rušenja (uključujući i iskopanu zemlju sa kontaminiranih lokacija)
+>1701 beton, cigle, crep i keramika
+170101 beton
+170102 cigle
+170103 crep i keramika
+170106* mešavine ili pojedine frakcije betona, cigle, pločice i keramika koji sadrže opasne supstance
+170107 mešavine ili pojedine frakcije betona, cigle, pločice i keramika drugačiji od onih navedenih u 17 01 06
+>1702 drvo, staklo i plastika
+170201 drvo
+170202 staklo
+170203 plastika
+170204* staklo, plastika i drvo koji sadrže opasne supstance ili su kontaminirani opasnim supstancama
+>1703 bituminozne mešavine, katran i katranski proizvodi
+170301* bituminozne mešavine koje sadrže katran od uglja
+170302 bituminozne mešavine drugačije od onih navedenih u 17 03 01
+170303* katran od uglja i katranski proizvodi
+>1704 metali (uključujući i njihove legure)
+170401 bakar, bronza, mesing
+170402 aluminijum
+170403 olovo
+170404 cink
+170405 gvožđe i čelik
+170406 kalaj
+170407 mešani metali
+170409* otpad od metala kontaminiran opasnim supstancama
+170410* kablovi koji sadrže ulje, katran od uglja i druge opasne supstance
+170411 kablovi drugačiji od onih navedenih u 17 04 10
+>1705 zemlja (uključujući zemlju iskopanu sa kontaminiranih lokacija), kamen i iskop
+170503* zemlja i kamen koji sadrže opasne supstance
+170504 zemlja i kamen drugačiji od onih navedenih u 17 05 03
+170505* iskop koji sadrži opasne supstance
+170506 iskop drugačiji od onog navedenog u 17 05 05
+170507* otpad koji spada sa gusenica koji sadrži opasne supstance
+170508 otpad koji spada sa gusenica drugačiji od onog navedenog u 17 05 07
+>1706 izolacioni materijali i građevinski materijali koji sadrže azbest
+170601* izolacioni materijali koji sadrže azbest
+170603* ostali izolacioni materijali koji se sastoje od ili sadrže opasne supstance
+170604 izolacioni materijali drugačiji od onih navedenih u 17 06 01 i 17 06 03
+170605* građevinski materijali koji sadrže azbest
+>1708 građevinski materijal na bazi gipsa
+170801* građevinski materijal na bazi gipsa kontaminirani opasnim supstancama
+170802 građevinski materijal na bazi gipsa drugačiji od onih navedenih u 17 08 01
+>1709 ostali otpadi od građenja i rušenja
+170901* otpadi od građenja i rušenja koji sadrže živu
+170902* otpadi od građenja i rušenja koji sadrže PCB (npr. zaptivači koji sadrže PCB, podovi na bazi smola koji sadrže PCB, glazure koje sadrže PCB i kondenzatori koji sadrže PCB)
+170903* ostali otpadi od građenja i rušenja (uključujući mešane otpade) koji sadrže opasne supstance
+170904 mešani otpadi od građenja i rušenja drugačiji od onih navedenih u 17 09 01 i 17 09 02 i 17 09 03
+
+@18 Otpadi od zdravstvene zaštite ljudi i životinja i/ili s tim povezanog istraživanja (izuzev otpada iz kuhinja i restorana koji ne dolazi od neposredne zdravstvene zaštite)
+>1801 otpadi iz porodilišta, dijagnostike, tretmana ili prevencije bolesti ljudi
+180101 oštri instrumenti (izuzev 18 01 03)
+180102 delovi tela i organi uključujući i kese sa krvlju i krvne produkte (izuzev 18 01 03)
+180103* otpadi čije sakupljanje i odlaganje podleže posebnim zahtevima zbog sprečavanja infekcije
+180104 otpadi čije sakupljanje i odlaganje ne podleže posebnim zahtevima zbog sprečavanja infekcije (npr. zavoji, gipsevi, posteljina, odeća za jednokratnu upotrebu i pelene)
+180106* hemikalije koje se sastoje od ili sadrže opasne supstance
+180107 hemikalije drugačije od onih navedenih u 18 01 06
+180108* citotoksični i citostatični lekovi
+180109 lekovi drugačiji od onih navedenih u 18 01 08
+180110* otpadni amalgam iz stomatologije
+>1802 otpadi od istraživanja, dijagnostike, tretmana ili prevencije bolesti životinja
+180201 oštri instrumenti (izuzev 18 02 02)
+180202* otpadi čije sakupljanje i odlaganje podleže posebnim zahtevima zbog sprečavanja infekcije
+180203 otpadi čije sakupljanje i odlaganje ne podleže posebnim zahtevima zbog sprečavanja infekcije
+180205* hemikalije koje se sastoje od ili sadrže opasne supstance
+180206 hemikalije drugačije od onih navedenih u 18 02 05
+180207* citotoksični i citostatični lekovi
+180208 lekovi drugačiji od onih navedenih u 18 02 07
+
+@19 Otpadi iz postrojenja za obradu otpada, pogona za tretman otpadnih voda van mesta nastajanja i pripremu vode za ljudsku potrošnju i korišćenje u industriji
+>1901 otpadi od spaljivanja ili pirolize otpada
+190102 materijali koji sadrže gvožđe izvađeni iz šljake
+190105* filter - kolač (pogače) iz tretmana gasa
+190106* tečni otpadi na bazi vode od tretmana gasa i drugi tečni otpadi na bazi vode
+190107* čvrsti otpadi od tretmana gasa
+190110* istrošeni aktivni ugalj od tretmana gasa
+190111* šljaka koja sadrži opasne supstance
+190112 šljaka drugačija od one navedene u 19 01 11
+190113* leteći pepeo koji sadrži opasne supstance
+190114 leteći pepeo drugačiji od onog navedenog u 19 01 13
+190115* prašina iz kotla koja sadrži opasne supstance
+190116 prašina iz kotla drugačija od one navedene u 19 01 15
+190117* otpadi od pirolize koji sadrže opasne supstance
+190118 otpadi od pirolize drugačiji od onih navedenih u 19 01 17
+190119 pesak iz fluidizovanog sloja
+190199 otpadi koji nisu drugačije specificirani
+>1902 otpadi od fizičko/hemijskih tretmana otpada (uključujući dehromiranje, decijanizaciju i neutralizaciju)
+190203 prethodno izmešani otpadi koji se sastoje samo od neopasnog otpada
+190204* prethodno izmešani otpadi koji se sastoje od najmanje jednog opasnog otpada
+190205* muljevi iz fizičko/hemijskog tretmana koji sadrže opasne supstance
+190206 muljevi iz fizičko/hemijskog tretmana drugačiji od onih navedenih u 19 02 05
+190207* ulja i koncentrati od separacije
+190208* tečni sagorljivi otpadi koji sadrže opasne supstance
+190209* čvrsti sagorljivi otpadi koji sadrže opasne supstance
+190210 sagorljivi otpadi drugačiji od onih navedenih u 19 02 08 i 19 02 09
+190211* ostali otpadi koji sadrže opasne supstance
+190299 otpadi koji nisu drugačije specificirani
+>1903 stabilizovani/solidifikovani otpadi
+190304* otpadi označeni kao opasni, delimično stabilizovani
+190305 stabilizovani otpadi drugačiji od onih navedenih u 19 03 04
+190306* otpadi označeni kao opasni, solidifikovani
+190307 solidifikovani otpadi drugačiji od onih navedenih u 19 03 06
+>1904 ostakljen (vitrifikovan) otpad i otpadi nastali u procesu vitrifikacije
+190401 ostakljen (vitrifikovan) otpad
+190402* leteći pepeo i ostali otpadi od tretmana dimnog gasa
+190403* čvrsta faza koja se nije vitrifikovala
+190404 tečni otpadi na bazi vode od kaljenja vitrifikovanog otpada
+>1905 otpadi od aerobnog tretmana čvrstih otpada
+190501 nekompostirana frakcija komunalnog i sličnih otpada
+190502 nekompostirana frakcija životinjskog i biljnog otpada
+190503 kompost van specifikacije
+190599 otpadi koji nisu drugačije specificirani
+>1906 otpadi od anaerobnog tretmana otpada
+190603 tečnost iz anaerobnog tretmana komunalnog otpada
+190604 digestat iz anaerobnog tretmana komunalnog otpada
+190605 tečnost iz anaerobnog tretmana životinjskog i biljnog otpada
+190606 digestat iz anaerobnog tretmana životinjskog i biljnog otpada
+190699 otpadi koji nisu drugačije specificirani
+>1907 procedne vode iz sanitarnih deponija
+190702* procedne vode iz sanitarnih deponija koje sadrže opasne supstance
+190703 procedne vode iz sanitarnih deponija drugačije od onih navedenih u 19 07 02
+>1908 otpadi iz pogona za tretman otpadnih voda koji nisu drugačije specificirani
+190801 otpad od mehaničkog razdvajanja na rešetkama
+190802 otpad sa peščanog filtera
+190805 muljevi od tretmana urbanih otpadnih voda
+190806* zasićene ili potrošene jonoizmenjivačke smole
+190807* rastvori i muljevi iz regeneracije jonoizmenjivača
+190808* otpad sa membranskog sistema koji sadrži teške metale
+190809 smeše masti i ulja iz separacije ulje/voda koje sadrže samo jestiva ulja i masnoće
+190810* smeše masti i ulja iz separacije ulje/voda drugačije od onih navedenih u 19 08 09
+190811* muljevi koji sadrže opasne supstance iz biološkog tretmana industrijske otpadne vode
+190812 muljevi iz biološkog tretmana industrijske otpadne vode drugačiji od onih navedenih u 19 08 11
+190813* muljevi koji sadrže opasne supstance iz ostalih tretmana industrijske otpadne vode
+190814 muljevi iz ostalih tretmana industrijske otpadne vode drugačiji od onih navedenih u 19 08 13
+190899 otpadi koji nisu drugačije specificirani
+>1909 otpadi od pripreme vode za ljudsku potrošnju ili korišćenje u industriji
+190901 čvrsti otpad iz primarne filtracije mehaničkog razdvajanja na rešetkama
+190902 muljevi od bistrenja vode
+190903 muljevi od dekarbonizacije vode
+190904 istrošeni aktivni ugalj
+190905 zasićene ili istrošene jonoizmenjivačke smole
+190906 rastvori i muljevi od regeneracije jonoizmenjivača
+190999 otpadi koji nisu drugačije specificirani
+>1910 otpadi od sitnjenja otpada koji sadrže metal
+191001 otpad od gvožđa i čelika
+191002 otpad od obojenih metala
+191003* laka frakcija i prašina koje sadrže opasne supstance
+191004 laka frakcija i prašina drugačije od onih navedenih u 19 10 03
+191005* ostale frakcije koje sadrže opasne supstance
+191006 ostale frakcije drugačije od onih navedenih u 19 10 05
+>1911 otpadi iz regeneracije ulja
+191101* istrošena filterska glina
+191102* kiseli katrani
+191103* tečni otpadi na bazi vode
+191104* otpadi od čišćenja goriva bazama
+191105* muljevi iz tretmana otpadnih voda na mestu nastajanja koji sadrže opasne supstance
+191106 muljevi iz tretmana otpadnih voda na mestu nastajanja drugačiji od onih navedenih u 19 11 05
+191107* otpadi od prečišćavanja dimnih gasova
+191199 otpadi koji nisu drugačije specificirani
+>1912 otpadi od mehaničkog tretmana otpada (npr. sortiranja, drobljenja, kompaktiranja i paletizovanja) koji nisu drugačije specificirani
+191201 papir i karton
+191202 metali koji sadrže gvožđe
+191203 obojeni metali
+191204 plastika i guma
+191205 staklo
+191206* drvo koje sadrži opasne supstance
+191207 drvo drugačije od onog navedenog u 19 12 06
+191208 tekstil
+191209 minerali (npr. pesak i kamen)
+191210 sagorljivi otpad (gorivo dobijeno iz otpada)
+191211* drugi otpadi (uključujući mešavine materijala) od mehaničkog tretmana otpada koji sadrže opasne supstance
+191212 drugi otpadi (uključujući mešavine materijala) od mehaničkog tretmana otpada drugačiji od onih navedenih u 19 12 11
+>1913 otpadi od remedijacije zemljišta i podzemnih voda
+191301* čvrsti otpadi od remedijacije zemljišta koji sadrže opasne supstance
+191302 čvrsti otpadi od remedijacije zemljišta drugačiji od onih navedenih u 19 13 01
+191303* muljevi od remedijacije zemljišta koji sadrže opasne supstance
+191304 muljevi od remedijacije zemljišta drugačiji od onih navedenih u 19 13 03
+191305* muljevi od remedijacije podzemnih voda koji sadrže opasne supstance
+191306 muljevi od remedijacije podzemnih voda drugačiji od onih navedenih u 19 13 05
+191307* tečni otpadi na bazi vode i vodeni koncentrati od remedijacije podzemnih voda koji sadrže opasne supstance
+191308 tečni otpadi na bazi vode i vodeni koncentrati od remedijacije podzemnih voda drugačiji od onih navedenih u 19 13 07
+
+@20 Komunalni otpadi (kućni otpad i slični komercijalni industrijski otpadi), uključujući odvojeno sakupljene frakcije
+>2001 odvojeno sakupljene frakcije (izuzev 15 01)
+200101 papir i karton
+200102 staklo
+200108 biorazgradivi kuhinjski i otpad iz restorana
+200110 odeća
+200111 tekstil
+200113* rastvarači
+200114* kiseline
+200115* baze
+200117* foto-hemikalije
+200119* pesticidi
+200121* fluorescentne cevi i drugi otpad koji sadrži živu
+200123* odbačena oprema koja sadrži hlorofluorougljovodonike
+200125 jestiva ulja i masti
+200126* ulja i masti drugačiji od onih navedenih u 20 01 25
+200127* boja, mastila, lepkovi i smole koji sadrže opasne supstance
+200128 boja, mastila, lepkovi i smole drugačiji od onih navedenih u 20 01 27
+200129* deterdženti koji sadrže opasne supstance
+200130 deterdženti drugačiji od onih navedenih u 20 01 29
+200131* citotoksični i citostatični lekovi
+200132 lekovi drugačiji od onih navedenih u 20 01 31
+200133* baterije i akumulatori uključeni u 16 06 01, 16 06 02 ili 16 06 03 i nesortirane baterije i akumulatori koji sadrže ove baterije
+200134 baterije i akumulatori drugačiji od onih navedenih u 20 01 33
+200135* odbačena elektronska i električna oprema koja sadrži opasne komponente
+200136 odbačena električna i elektronska oprema drugačija od one navedene u 20 01 21, 20 01 23 i 20 01 35
+200137* drvo koje sadrži opasne supstance
+200138 drvo drugačije od onog navedenog u 20 01 37
+200139 plastika
+200140 metali
+200141 otpadi od čišćenja dimnjaka
+200199 ostale frakcije koje nisu drugačije specificirane
+>2002 otpadi iz vrtova i parkova (uključujući i otpad sa groblja)
+200201 biodegradabilni otpad
+200202 zemlja i kamen
+200203 ostali nebiodegradabilni otpad
+>2003 ostali komunalni otpadi
+200301 mešani komunalni otpad
+200302 otpad sa pijaca
+200303 ostaci od čišćenja ulica
+200304 muljevi iz septičkih jama
+200306 otpad od čišćenja kanalizacije
+200307 kabasti otpad
+200399 komunalni otpadi koji nisu drugačije specificirani
+</script>
+<script>
+(function(){
+  "use strict";
+  // ---- Parse embedded catalogue ----
+  var raw = document.getElementById('data').textContent;
+  var groups = {};      // "01" -> name
+  var subgroups = {};   // "0101" -> name
+  var entries = [];     // {code, fmt, name, haz, g, s}
+  var byCode = {};      // "160103" -> entry
+
+  function fmt(c){ return c.slice(0,2)+' '+c.slice(2,4)+' '+c.slice(4,6); }
+
+  raw.split('\n').forEach(function(line){
+    line = line.trim();
+    if(!line) return;
+    if(line[0]==='@'){
+      var g = line.slice(1,3);
+      groups[g] = line.slice(4).trim();
+    } else if(line[0]==='>'){
+      var s = line.slice(1,5);
+      subgroups[s] = line.slice(6).trim();
+    } else {
+      var sp = line.indexOf(' ');
+      var code = line.slice(0,sp);
+      var name = line.slice(sp+1).trim();
+      var haz = code.indexOf('*')>-1;
+      code = code.replace('*','');
+      var e = {code:code, fmt:fmt(code), name:name, haz:haz, g:code.slice(0,2), s:code.slice(0,4)};
+      entries.push(e);
+      byCode[code] = e;
+    }
+  });
+
+  // normalize for search (strip diacritics)
+  function norm(s){
+    return s.toLowerCase()
+      .replace(/č|ć/g,'c').replace(/š/g,'s').replace(/ž/g,'z').replace(/đ/g,'d');
+  }
+  entries.forEach(function(e){ e.q = norm(e.name); });
+
+  // ---- DOM ----
+  var qEl = document.getElementById('q');
+  var clearEl = document.getElementById('clear');
+  var metaEl = document.getElementById('meta');
+  var outEl = document.getElementById('out');
+  var backEl = document.getElementById('back');
+  var toastEl = document.getElementById('toast');
+  var mNum = document.getElementById('m-num');
+  var mName = document.getElementById('m-name');
+  var mode = 'num';
+  var lastResults = null; // remember list to return to via "Nazad"
+
+  function setMode(m){
+    mode = m;
+    document.body.classList.toggle('name-mode', m==='name');
+    document.body.classList.toggle('num-mode', m==='num');
+    mNum.setAttribute('aria-selected', m==='num');
+    mName.setAttribute('aria-selected', m==='name');
+    qEl.value='';
+    qEl.setAttribute('inputmode', m==='num'?'numeric':'text');
+    qEl.placeholder = m==='num' ? 'npr. 16 01 03' : 'npr. ambalaža, ulje, baterije';
+    clearEl.classList.remove('show');
+    qEl.focus();
+    render();
+  }
+  mNum.addEventListener('click', function(){ setMode('num'); });
+  mName.addEventListener('click', function(){ setMode('name'); });
+
+  // digits -> "GG SS PP" live formatting in num mode
+  function formatLive(v){
+    var d = v.replace(/\D/g,'').slice(0,6);
+    var out='';
+    for(var i=0;i<d.length;i++){ if(i===2||i===4) out+=' '; out+=d[i]; }
+    return {disp:out, digits:d};
+  }
+
+  qEl.addEventListener('input', function(){
+    if(mode==='num'){
+      var f = formatLive(qEl.value);
+      qEl.value = f.disp;
+    }
+    clearEl.classList.toggle('show', qEl.value.length>0);
+    render();
+  });
+  clearEl.addEventListener('click', function(){ qEl.value=''; clearEl.classList.remove('show'); qEl.focus(); render(); });
+  backEl.addEventListener('click', function(){ if(lastResults){ renderList(lastResults.items, lastResults.label); } });
+
+  function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function render(){
+    backEl.classList.remove('show');
+    var v = qEl.value.trim();
+    if(!v){ renderEmpty(); return; }
+
+    if(mode==='num'){
+      var d = v.replace(/\D/g,'');
+      if(d.length===0){ renderEmpty(); return; }
+      var matches = entries.filter(function(e){ return e.code.indexOf(d)===0; });
+      if(d.length===6 && byCode[d]){ renderDetail(byCode[d], null); return; }
+      renderList(matches, d.length===6 ? null : prefixLabel(d));
+    } else {
+      var nq = norm(v);
+      if(nq.length<2){ metaEl.textContent='Ukucaj bar 2 slova…'; outEl.innerHTML=''; return; }
+      var matches2 = entries.filter(function(e){ return e.q.indexOf(nq)>-1; });
+      renderList(matches2, null);
+    }
+  }
+
+  function prefixLabel(d){
+    if(d.length>=4 && subgroups[d.slice(0,4)]) return 'Podgrupa '+d.slice(0,2)+' '+d.slice(2,4)+' · '+subgroups[d.slice(0,4)];
+    if(d.length>=2 && groups[d.slice(0,2)]) return 'Grupa '+d.slice(0,2)+' · '+groups[d.slice(0,2)];
+    return null;
+  }
+
+  function renderList(items, label){
+    lastResults = {items:items, label:label};
+    backEl.classList.remove('show');
+    if(items.length===0){
+      metaEl.textContent='';
+      outEl.innerHTML = '<div class="none">Nema rezultata. Proveri broj ili pretraži po nazivu.</div>';
+      return;
+    }
+    if(items.length===1){ renderDetail(items[0], {items:items, label:label}); return; }
+    metaEl.textContent = (label?label+'  ·  ':'') + items.length + ' rezultata';
+    var html = '<ul class="list">';
+    items.slice(0,400).forEach(function(e){
+      html += '<li class="row" data-code="'+e.code+'">'
+        + '<span class="dot '+(e.haz?'h':'s')+'"></span>'
+        + '<span class="code">'+e.fmt+(e.haz?'<span class="star" style="color:var(--hazard)">*</span>':'')+'</span>'
+        + '<span class="nm">'+esc(e.name)+'</span>'
+        + '<span class="chev">›</span>'
+        + '</li>';
+    });
+    html += '</ul>';
+    outEl.innerHTML = html;
+    Array.prototype.forEach.call(outEl.querySelectorAll('.row'), function(row){
+      row.addEventListener('click', function(){
+        renderDetail(byCode[row.getAttribute('data-code')], lastResults);
+      });
+    });
+  }
+
+  function renderDetail(e, returnTo){
+    metaEl.textContent='';
+    if(returnTo && returnTo.items && returnTo.items.length>1){
+      backEl.classList.add('show');
+      lastResults = returnTo;
+    } else {
+      backEl.classList.remove('show');
+    }
+    var cls = e.haz?'hazard':'safe';
+    var badge = e.haz
+      ? '<span class="badge h">⚠ Opasan otpad</span>'
+      : '<span class="badge s">● Neopasan otpad</span>';
+    var html = '<div class="card '+cls+'">'
+      + '<div class="top">'
+      +   badge
+      +   '<div class="bigcode">'+e.fmt+(e.haz?'<span class="star">*</span>':'')+'</div>'
+      +   '<div class="naziv">'+esc(e.name)+'</div>'
+      + '</div>'
+      + '<div class="ctx">'
+      +   '<div><div class="k">Grupa</div><div class="v"><b>'+e.g+'</b> · '+esc(groups[e.g]||'')+'</div></div>'
+      +   '<div><div class="k">Podgrupa</div><div class="v"><b>'+e.s.slice(0,2)+' '+e.s.slice(2,4)+'</b> · '+esc(subgroups[e.s]||'')+'</div></div>'
+      +   '<div><div class="k">Status</div><div class="v">'+(e.haz
+            ? 'Opasan otpad — označen zvezdicom (*) u Katalogu otpada.'
+            : 'Neopasan otpad.')+'</div></div>'
+      + '</div>'
+      + '<div class="actions">'
+      +   '<button id="copyCode">Kopiraj broj</button>'
+      +   '<button id="copyFull">Kopiraj broj + naziv</button>'
+      + '</div>'
+      + '</div>';
+    outEl.innerHTML = html;
+    document.getElementById('copyCode').addEventListener('click', function(){
+      copy(e.fmt+(e.haz?'*':''));
+    });
+    document.getElementById('copyFull').addEventListener('click', function(){
+      copy(e.fmt+(e.haz?'*':'')+' — '+e.name);
+    });
+  }
+
+  function renderEmpty(){
+    lastResults=null;
+    backEl.classList.remove('show');
+    var haz = entries.filter(function(e){return e.haz;}).length;
+    metaEl.textContent = entries.length + ' indeksnih brojeva · ' + haz + ' opasnih';
+    var html = '<div class="empty"><h2>Grupe otpada</h2><div class="chips">';
+    Object.keys(groups).sort().forEach(function(g){
+      html += '<button class="chip" data-g="'+g+'">'
+        + '<span class="gn">'+g+'</span>'
+        + '<span class="gt">'+esc(groups[g])+'</span>'
+        + '</button>';
+    });
+    html += '</div></div>';
+    outEl.innerHTML = html;
+    Array.prototype.forEach.call(outEl.querySelectorAll('.chip'), function(chip){
+      chip.addEventListener('click', function(){
+        var g = chip.getAttribute('data-g');
+        setMode('num');
+        qEl.value = g;
+        clearEl.classList.add('show');
+        render();
+        window.scrollTo({top:0,behavior:'smooth'});
+      });
+    });
+  }
+
+  function copy(text){
+    var done = function(){ toast(); };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(done, fallback);
+    } else { fallback(); }
+    function fallback(){
+      var ta=document.createElement('textarea'); ta.value=text; ta.style.position='fixed'; ta.style.opacity='0';
+      document.body.appendChild(ta); ta.select();
+      try{ document.execCommand('copy'); }catch(e){}
+      document.body.removeChild(ta); toast();
+    }
+  }
+  var toastTimer;
+  function toast(){
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer=setTimeout(function(){ toastEl.classList.remove('show'); }, 1400);
+  }
+
+  // init
+  renderEmpty();
+  qEl.focus();
+})();
+
+</script>
+</body>
+</html>
